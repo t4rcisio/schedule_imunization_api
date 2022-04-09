@@ -1,9 +1,9 @@
 import Router from "express";
 
-import user from "./user.js";
+import nurse from "./nurse_user.js";
 
 const router = Router();
 
-router.use("/user", user);
+router.use("/nurse", nurse);
 
 export default router;

@@ -6,6 +6,62 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mongodb"
   url      = env("DATABASE_URL")
+}
+
+model Clinic {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  name      String
+  zipcode   String
+  address   String
+  number    String
+  Session   Session[]
+}
+
+model Session {
+  id              String            @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt       DateTime          @default(now())
+  date            DateTime
+  clinic          Clinic            @relation(fields: [clinicId], references: [id])
+  clinicId        String            @db.ObjectId
+  Patiete_session Patient_session[]
+}
+
+model Patient_session {
+  id             String       @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt      DateTime     @default(now())
+  status         Status       @default(Scheduled)
+  Session        Session      @relation(fields: [sessionId], references: [id])
+  Patient        Patient_user @relation(fields: [patient_userId], references: [id])
+  patient_userId String       @db.ObjectId
+  sessionId      String       @db.ObjectId
+}
+
+model Patient_user {
+  id              String            @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  name            String
+  cpf             String            @unique
+  birthday        DateTime
+  Patiete_session Patient_session[]
+}
+
+model Nurse_user {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name      String
+  cpf       String   @unique
+  password  String
+
+}
+
+enum Status {
+  Scheduled
+  Done
+  Canceled
 }
