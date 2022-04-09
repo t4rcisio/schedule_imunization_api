@@ -6,13 +6,13 @@ class Controller {
     this.client = prisma[colletion];
   }
 
-  async FindOne(request, response) {
+  async FindOnebyID(request, response) {
     const { id } = request.body;
 
     let clientData;
     try {
       clientData = await this.client.findOne({
-        id,
+        where: { id },
       });
     } catch (error) {
       clientData = error;
@@ -57,7 +57,7 @@ class Controller {
 
     try {
       clientData = await this.client.delete({
-        id,
+        where: { id },
       });
     } catch (error) {
       clientData = error;
