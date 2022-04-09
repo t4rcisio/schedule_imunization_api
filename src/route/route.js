@@ -1,6 +1,6 @@
 import Router from "express";
 
-import nurse from "./nurse_user.js";
+import nurse from "./nurseRoute.js";
 
 const router = Router();
 

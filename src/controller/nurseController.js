@@ -10,8 +10,6 @@ class UserController extends Controller {
   async Create(request, response) {
     const { name, cpf, password } = request.body;
 
-    if (!name || !cpf || !password) response.send("missing data");
-
     //response.send({ name: name, cpf: cpf, password: password });
     await super.Create(request, response);
   }
@@ -29,5 +27,4 @@ model Nurse_user {
   password  String
 
 }
-
 */
