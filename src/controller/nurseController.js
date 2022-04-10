@@ -5,12 +5,13 @@ class UserController extends Controller {
     super("Nurse_user");
   }
 
-  async getOne(request, response) {}
+  async GetOne(request, response) {
+
+  }
 
   async Create(request, response) {
     const { name, cpf, password } = request.body;
 
-    //response.send({ name: name, cpf: cpf, password: password });
     await super.Create(request, response);
   }
 }
