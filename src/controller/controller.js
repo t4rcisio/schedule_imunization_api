@@ -6,7 +6,7 @@ class Controller {
     this.client = prisma[colletion];
   }
 
-  async FindOnebyID(request, response) {
+  async GetOne(request, response) {
     const { id } = request.body;
 
     let clientData;
@@ -35,7 +35,8 @@ class Controller {
   }
 
   async Update(request, response) {
-    const { id } = request.body;
+    const { id } = request.params;
+    console.log(id);
     let clientData;
     try {
       clientData = await this.client.update({
