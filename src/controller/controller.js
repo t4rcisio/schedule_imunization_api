@@ -7,12 +7,12 @@ class Controller {
   }
 
   async GetOne(request, response) {
-    const { id } = request.body;
+    const { cpf } = request.body;
 
     let clientData;
     try {
       clientData = await this.client.findOne({
-        where: { id },
+        where: { cpf },
       });
     } catch (error) {
       clientData = error;
@@ -53,12 +53,12 @@ class Controller {
   }
 
   async Delete(request, response) {
-    const { id } = request.body;
+    const { cpf } = request.body;
     let clientData;
 
     try {
       clientData = await this.client.delete({
-        where: { id },
+        where: { cpf },
       });
     } catch (error) {
       clientData = error;

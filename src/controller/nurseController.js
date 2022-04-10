@@ -4,16 +4,6 @@ class UserController extends Controller {
   constructor() {
     super("Nurse_user");
   }
-
-  async GetOne(request, response) {
-
-  }
-
-  async Create(request, response) {
-    const { name, cpf, password } = request.body;
-
-    await super.Create(request, response);
-  }
 }
 
 export default UserController;
