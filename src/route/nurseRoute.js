@@ -1,6 +1,6 @@
 import Route from "express";
 import UserController from "../controller/nurseController.js";
-import { NurseRules, NurseValidation } from "../utils/validator.js";
+import NurseValidation  from "../utils/validator.js";
 
 const route = Route();
 const clientController = new UserController();
@@ -9,11 +9,14 @@ const clientController = new UserController();
 
 route.post(
   "/new",
-  NurseRules(),
   NurseValidation,
   clientController.Create.bind(clientController)
 );
-route.post("/profile", clientController.Update.bind(clientController));
+route.post(
+  "/profile",
+  NurseValidation,
+  clientController.Update.bind(clientController)
+);
 route.delete("/delete", clientController.Delete.bind(clientController));
 route.get("/find", clientController.FindOnebyID.bind(clientController));
 
