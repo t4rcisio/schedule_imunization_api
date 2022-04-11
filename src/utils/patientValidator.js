@@ -1,4 +1,4 @@
-import { check, validationResult } from "express-validator";
+import { check, param, validationResult } from "express-validator";
 
 const PatientRules = (url) => {
   switch (url) {
@@ -6,7 +6,7 @@ const PatientRules = (url) => {
       {
         return [
           check("name").isLength({ min: 2 }),
-          check("birthday").isISO8601(),
+          check("birthday").isISO8601().toDate(),
           check("cpf").isLength({ min: 11, max: 11 }),
         ];
       }
@@ -14,8 +14,9 @@ const PatientRules = (url) => {
     case "edit":
       {
         return [
+          param("id").isString(),
           check("name").isLength({ min: 2 }),
-          check("birthday").isISO8601(),
+          check("birthday").isISO8601().toDate(),
           check("cpf").isLength({ min: 11, max: 11 }),
         ];
       }
@@ -27,7 +28,10 @@ const PatientRules = (url) => {
       break;
     case "delete":
       {
-        return [check("cpf").isLength({ min: 11, max: 11 })];
+        return [
+          param("id").isString(),
+          check("cpf").isLength({ min: 11, max: 11 }),
+        ];
       }
       break;
   }
