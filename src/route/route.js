@@ -1,12 +1,13 @@
 import Router from "express";
-import { route } from "express/lib/application";
 
 import nurse from "./nurseRoute.js";
 import patient from "./patientRoute.js";
+import clinic from "./clinicRoute.js";
 
 const router = Router();
 
 router.use("/nurse", nurse);
-route.use("/patient", patient);
+router.use("/patient", patient);
+router.use("/clinic", clinic);
 
 export default router;

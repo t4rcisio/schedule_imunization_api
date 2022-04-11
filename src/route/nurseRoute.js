@@ -18,7 +18,7 @@ route.post(
   clientController.Update.bind(clientController)
 );
 route.delete(
-  "/delete",
+  "/delete/:id",
   NurseRules("delete"),
   NurseValidation,
   clientController.Delete.bind(clientController)
@@ -27,7 +27,7 @@ route.get(
   "/login",
   NurseRules("login"),
   NurseValidation,
-  clientController.GetOne.bind(clientController)
+  clientController.Login.bind(clientController)
 );
 
 export default route;
