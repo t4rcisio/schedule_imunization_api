@@ -7,18 +7,50 @@ class Controller {
   }
 
   async GetOne(request, response) {
-    const { cpf } = request.body;
+    const { id } = request.body;
 
     let clientData;
     try {
-      clientData = await this.client.findOne({
-        where: { cpf },
+      clientData = await this.client.findUnique({
+        where: { id },
       });
     } catch (error) {
       clientData = error;
     }
 
-    response.send({ message: clientData });
+    response.send({ Data: clientData });
+  }
+
+  async Unic_cpf(request) {
+    const { cpf } = request.body;
+
+    let clientData;
+    try {
+      clientData = await this.client.findUnique({
+        where: { cpf },
+      });
+    } catch (error) {
+      clientData = error;
+    }
+    console.log(clientData);
+    return clientData;
+  }
+
+  async Login(request, response) {
+    const { cpf } = request.body;
+
+    let user = { Data: "", error: "" };
+    try {
+      user.Data = await this.client.findUnique({
+        where: { cpf },
+      });
+      user.error = false;
+    } catch (error) {
+      user.Data = error;
+      user.error = true;
+    }
+
+    return user;
   }
 
   async Create(request, response) {
@@ -31,7 +63,7 @@ class Controller {
       clientData = error;
     }
 
-    response.send({ message: clientData });
+    response.send({ Data: clientData });
   }
 
   async Update(request, response) {
@@ -49,22 +81,22 @@ class Controller {
       clientData = error;
     }
 
-    response.send({ message: clientData });
+    response.send({ Data: clientData });
   }
 
   async Delete(request, response) {
-    const { cpf } = request.body;
+    const { id } = request.params;
     let clientData;
 
     try {
       clientData = await this.client.delete({
-        where: { cpf },
+        where: { id },
       });
     } catch (error) {
       clientData = error;
     }
 
-    response.send({ message: clientData });
+    response.send({ Data: clientData });
   }
 }
 
