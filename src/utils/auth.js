@@ -1,8 +1,8 @@
-import dotenv from "dotenv"
+import dotenv from "dotenv";
+import jsonwebtoken from "jsonwebtoken";
 
-dotenv.config()
+dotenv.config();
 
+const UserAuth = (request, response, next) => {};
 
-const UserAuth = (request, response) =>{
-    
-}
+export default UserAuth;
