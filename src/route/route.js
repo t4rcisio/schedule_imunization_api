@@ -1,5 +1,4 @@
 import Router from "express";
-
 import nurse from "./nurseRoute.js";
 import patient from "./patientRoute.js";
 import clinic from "./clinicRoute.js";
