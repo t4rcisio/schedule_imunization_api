@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 
 import route from "./route/route.js";
+import userAuth from "./utils/auth.js";
 
 dotenv.config();
 
@@ -14,6 +15,7 @@ app.get("/", (request, response) => {
   response.send("Olá mundo");
 });
 
+app.use(userAuth);
 app.use(route);
 
 app.listen(port, () => {
