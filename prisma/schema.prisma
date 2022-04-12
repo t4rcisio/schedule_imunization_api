@@ -36,7 +36,7 @@ model Patient_session {
   status         Status       @default(Scheduled)
   Session        Session      @relation(fields: [sessionId], references: [id])
   Patient        Patient_user @relation(fields: [patient_userId], references: [id])
-  patient_userId String       @db.ObjectId
+  patient_userId String       @unique @db.ObjectId
   sessionId      String       @db.ObjectId
 }
 
