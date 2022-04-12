@@ -7,7 +7,7 @@ import clinic from "./clinicRoute.js";
 const router = Router();
 
 router.use("/nurse", nurse);
-router.use("/patient", patient);
+route.use("/patient", patient);
 router.use("/clinic", clinic);
 
 export default router;
