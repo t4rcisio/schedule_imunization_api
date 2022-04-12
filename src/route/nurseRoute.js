@@ -27,7 +27,7 @@ route.get(
   "/login",
   NurseRules("login"),
   NurseValidation,
-  clientController.GetOne.bind(clientController)
+  clientController.Login.bind(clientController)
 );
 
 export default route;
