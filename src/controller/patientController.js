@@ -1,5 +1,8 @@
 import Controller from "./controller.js";
+import jsonwebtoken from "jsonwebtoken";
+import dotenv from "dotenv";
 
+dotenv.config();
 class PatientControl extends Controller {
   constructor() {
     super("Patient_user");
@@ -17,7 +20,31 @@ class PatientControl extends Controller {
     return await super.Create(request, response);
   }
 
-  async Login(request, response) {}
+  async Login(request, response) {
+    const user = await super.GetByCPF(request);
+
+    if (user.error) response.send("<h3>Unable connct to server</h3>");
+    if (!user.data) response.send("<h2>CPF not found</h2>");
+
+    const { id, name } = user.data;
+    const client = {
+      id,
+      name,
+    };
+
+    // -> Generate a hash
+    const token = jsonwebtoken.sign(client, process.env.SECRET_KEY_TOKEN, {
+      expiresIn: "8h",
+    });
+
+    // -> Store hash on cookie database
+    response.cookie(process.env.COOKIE_KEY, token, {
+      maxAge: 60 * 60 * 8,
+      httpOnly: true,
+      secure: true,
+      path: "/",
+    });
+  }
 }
 
 export default PatientControl;
