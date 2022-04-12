@@ -56,6 +56,8 @@ class PatientControl extends Controller {
 
     this.ListSessions(user.data, response);
   }
+
+
 }
 
 export default PatientControl;
