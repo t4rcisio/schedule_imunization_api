@@ -4,7 +4,9 @@ import jsonwebtoken from "jsonwebtoken";
 import dotenv from "dotenv";
 import { cpf } from "cpf-cnpj-validator";
 
+import Joi from "joi";
 dotenv.config();
+
 class UserController extends Controller {
   constructor() {
     super("Nurse_user");
@@ -21,6 +23,8 @@ class UserController extends Controller {
 
     // Prisma does't support @unique parameter on Mongodb yet,
     // so, I have to do it manually
+
+    if (cpf.isValid(request.body.cpf)) return response.send("invalid cpf");
     const user = await super.Unic_cpf(request);
     if (user) return response.send("CPF is already in use");
 
@@ -59,16 +63,9 @@ class UserController extends Controller {
       secure: true,
       path: "/",
     });
-
-    console.log(request.headers.cookie);
-
-    return response.send(token);
   }
 
-  async Update(request, response) {
-    
-    
-  }
+  async Update(request, response) {}
 }
 
 export default UserController;
