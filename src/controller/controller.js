@@ -9,94 +9,103 @@ class Controller {
   async GetOne(request, response) {
     const { id } = request.body;
 
-    let clientData;
+    let clientData = { data: "", error: "" };
     try {
-      clientData = await this.client.findUnique({
+      clientData.data = await this.client.findUnique({
         where: { id },
       });
+      clientData.error = false;
     } catch (error) {
-      clientData = error;
+      clientData.data = error;
+      clientData.error = true;
     }
 
-    response.send({ Data: clientData });
+    return clientData;
   }
 
   async Unic_cpf(request) {
     const { cpf } = request.body;
 
-    let clientData;
+    let clientData = { data: "", error: "" };
     try {
-      clientData = await this.client.findUnique({
+      clientData.data = await this.client.findUnique({
         where: { cpf },
       });
+      clientData.error = false;
     } catch (error) {
-      clientData = error;
+      clientData.data = error;
+      clientData.error = true;
     }
-    console.log(clientData);
     return clientData;
   }
 
   async Login(request, response) {
     const { cpf } = request.body;
 
-    let user = { Data: "", error: "" };
+    let clientData = { data: "", error: "" };
     try {
-      user.Data = await this.client.findUnique({
+      clientData.data = await this.client.findUnique({
         where: { cpf },
       });
-      user.error = false;
+      clientData.error = false;
     } catch (error) {
-      user.Data = error;
-      user.error = true;
+      clientData.data = error;
+      clientData.error = true;
     }
-
-    return user;
+    console.log(clientData);
+    return clientData;
   }
 
   async Create(request, response) {
-    let clientData;
+    let clientData = { data: "", error: "" };
     try {
-      clientData = await this.client.create({
+      clientData.data = await this.client.create({
         data: request.body,
       });
+      clientData.error = false;
     } catch (error) {
-      clientData = error;
+      clientData.data = error;
+      clientData.error = true;
     }
 
-    response.send({ Data: clientData });
+    return clientData;
   }
 
   async Update(request, response) {
     const { id } = request.params;
-    console.log(id);
-    let clientData;
+
+    let clientData = { data: "", error: "" };
     try {
-      clientData = await this.client.update({
+      clientData.data = await this.client.update({
         data: request.body,
         where: {
           id,
         },
       });
+      clientData.error = false;
     } catch (error) {
-      clientData = error;
+      clientData.data = error;
+      clientData.error = true;
     }
 
-    response.send({ Data: clientData });
+    return clientData;
   }
 
   async Delete(request, response) {
     const { id } = request.params;
-    let clientData;
+    let clientData = { data: "", error: "" };
 
     try {
       clientData = await this.client.delete({
         where: { id },
       });
+      clientData.error = false;
     } catch (error) {
-      clientData = error;
+      clientData.data = error;
+      clientData.error = true;
     }
 
-    response.send({ Data: clientData });
+    return clientData;
   }
 }
 

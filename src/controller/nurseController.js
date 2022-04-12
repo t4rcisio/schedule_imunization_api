@@ -34,16 +34,16 @@ class UserController extends Controller {
 
     if (user.error)
       return response.json({ error: "Unable to connect data server" });
-    if (!user.Data)
+    if (!user.data)
       return response.send({ error: "Incorrect login or password" });
 
     const { password } = request.body;
-    const hashPassword = user.Data.password;
+    const hashPassword = user.data.password;
     const hash = bcrypt.compareSync(password, hashPassword);
 
     if (!hash) return response.send({ error: "Incorrect login or password" });
 
-    const { id, name } = user.Data;
+    const { id, name } = user.data;
     const client = {
       id,
       name,
@@ -57,8 +57,9 @@ class UserController extends Controller {
       maxAge: 60 * 60 * 8,
       httpOnly: true,
       secure: true,
+      path: "/",
     });
-
+    console.log(response.cookie);
     return response.send(token);
   }
 
