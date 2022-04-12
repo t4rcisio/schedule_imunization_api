@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import Controller from "./controller.js";
 import jsonwebtoken from "jsonwebtoken";
 import dotenv from "dotenv";
+import { cpf } from "cpf-cnpj-validator";
 
 dotenv.config();
 class UserController extends Controller {
@@ -15,6 +16,9 @@ class UserController extends Controller {
   }
 
   async Create(request, response) {
+    const userCPf = request.body.cpf;
+    if (!cpf.isValid(userCPf)) return response.send("invalid cpf");
+
     // Prisma does't support @unique parameter on Mongodb yet,
     // so, I have to do it manually
     const user = await super.Unic_cpf(request);
