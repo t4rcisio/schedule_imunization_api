@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import url from "url";
 
 import route from "./route/route.js";
+import userAuth from "./utils/auth.js";
 
 dotenv.config();
 
@@ -31,6 +32,7 @@ app.get("/", (request, response) => {
   );
 });
 
+app.use(userAuth);
 app.use(route);
 
 app.listen(port, () => {
