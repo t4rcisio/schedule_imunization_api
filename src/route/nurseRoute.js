@@ -11,7 +11,7 @@ route.post(
   NurseValidation, // Validate body before processing request
   clientController.Create.bind(clientController)
 );
-route.post(
+route.get(
   "/edit/:id",
   NurseRules("edit"),
   NurseValidation, // Validate body before processing request
