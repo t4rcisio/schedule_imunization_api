@@ -18,7 +18,7 @@ route.post(
   clientController.Update.bind(clientController)
 );
 route.delete(
-  "/delete",
+  "/delete/:id",
   NurseRules("delete"),
   NurseValidation,
   clientController.Delete.bind(clientController)

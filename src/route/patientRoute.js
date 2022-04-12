@@ -12,22 +12,24 @@ route.post(
   clientController.Create.bind(clientController)
 );
 route.post(
-  "/edit",
+  "/edit/:id",
   PatientRules("edit"),
   PatientValidation,
-  clientController.Create.bind(clientController)
+  clientController.Update.bind(clientController)
 );
 route.delete(
-  "/delete",
+  "/delete/:id",
   PatientRules("delete"),
   PatientValidation,
-  clientController.Create.bind(clientController)
+  clientController.Delete.bind(clientController)
 );
 route.post(
   "/login",
   PatientRules("login"),
   PatientValidation,
-  clientController.Create.bind(clientController)
+  clientController.Login.bind(clientController)
 );
 
 export default route;
+
+
