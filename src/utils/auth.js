@@ -4,7 +4,6 @@ import jsonwebtoken from "jsonwebtoken";
 dotenv.config();
 
 const UserAuth = (request, response, next) => {
-  console.log(request.url);
   if (
     request.url === "/nurse/create" ||
     request.url == "/nurse/login" ||
@@ -12,21 +11,19 @@ const UserAuth = (request, response, next) => {
   )
     return next();
 
-  let hash;
-  try {
-    hash = request.cookies[process.env.COOKIE_KEY];
-  } catch (error) {
-    response.send("Invalid ky sdnaj");
-  }
+  const { auth_session } = request.cookies;
 
-  if (!hash) response.send("go to login");
+  if (!auth_session) return response.send("<h2>Go to login</h2>");
 
   try {
-    const token = jsonwebtoken.verify(hash, process.env.SECRET_KEY_TOKEN);
+    const token = jsonwebtoken.verify(
+      auth_session,
+      process.env.SECRET_KEY_TOKEN
+    );
   } catch (error) {
-    response.send("Invalid token");
+    return response.send("Invalid token");
   }
-  next();
+  return next();
 };
 
 export default UserAuth;

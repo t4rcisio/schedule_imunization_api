@@ -11,9 +11,9 @@ const port = process.env.SERVER_PORT || 5000;
 const app = express();
 
 app.use(express.json());
-//app.use(userAuth);
-app.use(route);
 app.use(cookieParser());
+app.use(userAuth);
+app.use(route);
 
 app.get("/", (request, response) => {
   response.cookie(

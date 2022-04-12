@@ -16,6 +16,20 @@ class UserController extends Controller {
     return bcrypt.hashSync(password, salt);
   }
 
+  VerifyToken(userToken) {
+    return (token = () => {
+      try {
+        const token = jsonwebtoken.verify(
+          userToken,
+          process.env.SECRET_KEY_TOKEN
+        );
+        return true;
+      } catch (error) {
+        return false;
+      }
+    });
+  }
+
   async Create(request, response) {
     // Prisma does't support @unique parameter on Mongodb yet,
     // so, I have to do it manually
@@ -64,14 +78,15 @@ class UserController extends Controller {
   }
 
   async Update(request, response) {
-    let hash;
-    try {
-      hash = request.cookies[process.env.COOKIE_KEY];
-    } catch (error) {
-      response.send("Invalid ky sdnaj");
-    }
+    const { id } = request.params;
+    const user = await super.GetOne(request);
+    if (user.error || !user.data) response.send("<h1>user not found 1</h1>");
 
-    response.send(hash);
+    const { userToken } = request.cookie;
+    if (!this.VerifyToken(userToken)) response.send("Error to validate token");
+    const payload = jsonwebtoken.decode(userToken);
+
+    response.send({ user: user, payload: payload });
   }
 }
 
