@@ -3,6 +3,7 @@ import Controller from "./controller.js";
 import jsonwebtoken from "jsonwebtoken";
 import dotenv from "dotenv";
 import { cpf } from "cpf-cnpj-validator";
+
 import Joi from "joi";
 dotenv.config();
 
@@ -31,6 +32,9 @@ class UserController extends Controller {
   }
 
   async Create(request, response) {
+    const userCPf = request.body.cpf;
+    if (!cpf.isValid(userCPf)) return response.send("invalid cpf");
+
     // Prisma does't support @unique parameter on Mongodb yet,
     // so, I have to do it manually
 
@@ -67,14 +71,12 @@ class UserController extends Controller {
       expiresIn: "8h",
     });
 
-    response.cookie("token", token, {
+    response.cookie(process.env.COOKIE_KEY, token, {
       maxAge: 60 * 60 * 8,
       httpOnly: true,
       secure: true,
       path: "/",
     });
-    console.log(response.cookie);
-    return response.send(token);
   }
 
   async Update(request, response) {
