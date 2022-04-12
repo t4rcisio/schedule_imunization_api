@@ -1,6 +1,7 @@
 import Controller from "./controller.js";
 import jsonwebtoken from "jsonwebtoken";
 import dotenv from "dotenv";
+import { response } from "express";
 
 dotenv.config();
 class PatientControl extends Controller {
@@ -8,16 +9,24 @@ class PatientControl extends Controller {
     super("Patient_user");
   }
 
+  ListSessions(user, response) {
+    const { Patiete_session } = user;
+    if (!Patiete_session) return response.send("You doesn't have any session");
+
+    return response.send({ PatientControl });
+  }
+
   async Create(request, response) {
     // Prisma does't support @unique parameter on Mongodb yet,
     // so, I have to do it manually
-    const user = await super.Unic_cpf(request);
-    if (user) return response.send("CPF is already in use");
+    const user = await super.GetByCPF(request);
+    if (user.data) return response.send("CPF is already in use");
 
     // convert date string to Date iso format
     request.body.birthday = new Date(request.body.birthday);
 
-    return await super.Create(request, response);
+    const newuser = await super.Create(request, response);
+    return response.send({ error: newuser.error, ...newuser.data });
   }
 
   async Login(request, response) {
@@ -44,6 +53,8 @@ class PatientControl extends Controller {
       secure: true,
       path: "/",
     });
+
+    this.ListSessions(user.data, response);
   }
 }
 
