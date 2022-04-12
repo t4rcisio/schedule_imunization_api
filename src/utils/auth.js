@@ -4,10 +4,20 @@ import jsonwebtoken from "jsonwebtoken";
 dotenv.config();
 
 const UserAuth = (request, response, next) => {
-  if (request.url === "/nurse/create" || request.url == "/nurse/login")
+  console.log(request.url);
+  if (
+    request.url === "/nurse/create" ||
+    request.url == "/nurse/login" ||
+    request.url === "/"
+  )
     return next();
 
-  const hash = request.cookies[process.env.COOKIE_KEY];
+  let hash;
+  try {
+    hash = request.cookies[process.env.COOKIE_KEY];
+  } catch (error) {
+    response.send("Invalid ky sdnaj");
+  }
 
   if (!hash) response.send("go to login");
 

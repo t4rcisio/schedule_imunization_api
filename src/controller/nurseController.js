@@ -63,7 +63,16 @@ class UserController extends Controller {
     return response.send(token);
   }
 
-  async Update(request, response) {}
+  async Update(request, response) {
+    let hash;
+    try {
+      hash = request.cookies[process.env.COOKIE_KEY];
+    } catch (error) {
+      response.send("Invalid ky sdnaj");
+    }
+
+    response.send(hash);
+  }
 }
 
 export default UserController;
