@@ -7,7 +7,7 @@ class Controller {
   }
 
   async GetOne(request, response) {
-    const { id } = request.body;
+    const { id } = request.params;
 
     let clientData = { data: "", error: "" };
     try {
@@ -23,7 +23,7 @@ class Controller {
     return clientData;
   }
 
-  async Unic_cpf(request) {
+  async GetByCPF(request) {
     const { cpf } = request.body;
 
     let clientData = { data: "", error: "" };

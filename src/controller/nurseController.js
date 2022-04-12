@@ -18,17 +18,15 @@ class UserController extends Controller {
   }
 
   VerifyToken(userToken) {
-    return (token = () => {
-      try {
-        const token = jsonwebtoken.verify(
-          userToken,
-          process.env.SECRET_KEY_TOKEN
-        );
-        return true;
-      } catch (error) {
-        return false;
-      }
-    });
+    try {
+      const token = jsonwebtoken.verify(
+        userToken,
+        process.env.SECRET_KEY_TOKEN
+      );
+      return true;
+    } catch (error) {
+      return false;
+    }
   }
 
   async Create(request, response) {
@@ -39,7 +37,7 @@ class UserController extends Controller {
     // so, I have to do it manually
 
     if (cpf.isValid(request.body.cpf)) return response.send("invalid cpf");
-    const user = await super.Unic_cpf(request);
+    const user = await super.GetByCPF(request);
     if (user) return response.send("CPF is already in use");
 
     // Transform password in a hash
@@ -48,47 +46,96 @@ class UserController extends Controller {
   }
 
   async Login(request, response) {
+    // -> Find user on db
     const user = await super.Login(request);
 
     if (user.error)
       return response.json({ error: "Unable to connect data server" });
     if (!user.data)
+      // -> cpf does't match
       return response.send({ error: "Incorrect login or password" });
 
+    // -> Verify recived password
     const { password } = request.body;
     const hashPassword = user.data.password;
     const hash = bcrypt.compareSync(password, hashPassword);
-
     if (!hash) return response.send({ error: "Incorrect login or password" });
 
+    // -> buid a payload
     const { id, name } = user.data;
     const client = {
       id,
       name,
     };
 
+    // -> Generate a hash
     const token = jsonwebtoken.sign(client, process.env.SECRET_KEY_TOKEN, {
       expiresIn: "8h",
     });
 
+    // -> Store hash on cookie database
     response.cookie(process.env.COOKIE_KEY, token, {
       maxAge: 60 * 60 * 8,
       httpOnly: true,
       secure: true,
       path: "/",
     });
+
+    response.send("logged");
   }
 
   async Update(request, response) {
-    const { id } = request.params;
+    // -> Find user bay id url parameter
     const user = await super.GetOne(request);
     if (user.error || !user.data) response.send("<h1>user not found 1</h1>");
 
-    const { userToken } = request.cookie;
-    if (!this.VerifyToken(userToken)) response.send("Error to validate token");
-    const payload = jsonwebtoken.decode(userToken);
+    // -> Verify token authenticity
+    const { auth_session } = request.cookies;
+    if (!this.VerifyToken(auth_session))
+      response.send("Error to validate token");
 
-    response.send({ user: user, payload: payload });
+    // -> Decode payload
+    const payload = jsonwebtoken.decode(auth_session);
+
+    // -> Before aplly updates, analyze body password
+    const { password } = request.body;
+    const passHash = user.data.password;
+
+    // -> Verify recived password
+    const hash = bcrypt.compareSync(password, passHash);
+    if (!hash) return response.send({ error: "Incorrect password" });
+
+    // Send data to update
+    const update = await super.Update(request, response);
+
+    response.send({ success: update.error, ...update.data });
+  }
+
+  async Delete(request, response) {
+    // -> Find user bay id url parameter
+    const user = await super.GetOne(request);
+    if (user.error || !user.data) response.send("<h1>user not found 1</h1>");
+
+    // -> Verify token authenticity
+    const { auth_session } = request.cookies;
+    if (!this.VerifyToken(auth_session))
+      response.send("Error to validate token");
+
+    // -> Decode payload
+    const payload = jsonwebtoken.decode(auth_session);
+
+    // -> Before aplly updates, analyze body password
+    const { password } = request.body;
+    const passHash = user.data.password;
+
+    // -> Verify recived password
+    const hash = bcrypt.compareSync(password, passHash);
+    if (!hash) return response.send({ error: "Incorrect password" });
+
+    // Senda data to delete
+    const update = await super.Delete(request, response);
+
+    response.send({ success: update.error, ...update.data });
   }
 }
 
