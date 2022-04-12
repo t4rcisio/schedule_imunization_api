@@ -1,6 +1,9 @@
 import express from "express";
 import dotenv from "dotenv";
+
 import url from "url";
+
+import cookieParser from "cookie-parser";
 import route from "./route/route.js";
 import userAuth from "./utils/auth.js";
 import cookieParser from "cookie-parser";
