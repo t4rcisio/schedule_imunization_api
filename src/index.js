@@ -22,7 +22,8 @@ app.get("/", (request, response) => {
   });
   response.redirect(
     url.format({
-      pathname: "./nurse/edit/625398eb40a08017b9962b86",
+      pathname:
+        "./nurse/edit/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYyNTM5OGViNDBhMDgwMTdiOTk2MmI4NiIsIm5hbWUiOiJUYXJjaXNvIiwiaWF0IjoxNjQ5NzgwNTU3LCJleHAiOjE2NDk4MDkzNTd9.Ixu0mpUesIkqNSOFfXBv2Uq9zFpAUCkndjX1AJ9iCf4",
       query: {
         name: "Tarciso",
         cpf: "12405581639",
