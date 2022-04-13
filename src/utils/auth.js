@@ -4,6 +4,7 @@ import jsonwebtoken from "jsonwebtoken";
 dotenv.config();
 
 const UserAuth = (request, response, next) => {
+  console.log(request.url);
   if (
     request.url === "/nurse/create" ||
     request.url === "/nurse/login" ||
@@ -11,9 +12,9 @@ const UserAuth = (request, response, next) => {
     request.url === "/patient/login" ||
     request.url === "/patient/new" ||
     request.url === "/clinic/new" ||
-    request.url === "clinic/find/:name" ||
-    request.url === "clinic/get/:id" ||
-    request.url === "clinic/all"
+    request.url === "/clinic/search" ||
+    request.url === "/clinic/get/:id" ||
+    request.url === "/clinic/all"
   )
     return next();
 

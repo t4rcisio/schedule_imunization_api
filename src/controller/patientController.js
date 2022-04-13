@@ -1,4 +1,4 @@
-import Controller from "./controller.js";
+import Controller from "./database/controllerUser.js";
 import jsonwebtoken from "jsonwebtoken";
 import dotenv from "dotenv";
 import { response } from "express";
@@ -20,6 +20,7 @@ class PatientControl extends Controller {
     // Prisma does't support @unique parameter on Mongodb yet,
     // so, I have to do it manually
     const user = await super.GetByCPF(request);
+    if (user.error) response.send("<h3>Unable connct to server</h3>");
     if (user.data) return response.send("CPF is already in use");
 
     // convert date string to Date iso format
@@ -56,8 +57,6 @@ class PatientControl extends Controller {
 
     this.ListSessions(user.data, response);
   }
-
-
 }
 
 export default PatientControl;

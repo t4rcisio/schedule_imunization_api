@@ -1,4 +1,4 @@
-import { check, validationResult } from "express-validator";
+import { check, param, validationResult } from "express-validator";
 
 const ClinicRules = (url) => {
   switch (url) {
@@ -6,8 +6,9 @@ const ClinicRules = (url) => {
       {
         return [
           check("name").trim().isLength({ min: 5 }),
-          check("zipcode").trim().isLength({ min: 6, max: 6 }),
+          check("zipcode").trim().isLength({ min: 8, max: 8 }),
           check("address").trim().isLength({ min: 10, max: 50 }),
+          check("district").trim().isLength({ min: 10, max: 50 }),
           check("number").trim().isLength({ min: 1, max: 10 }),
         ];
       }

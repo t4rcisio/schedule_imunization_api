@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import Controller from "./controller.js";
+import Controller from "./database/controllerUser.js";
 import jsonwebtoken from "jsonwebtoken";
 import dotenv from "dotenv";
 import { cpf } from "cpf-cnpj-validator";
@@ -33,16 +33,21 @@ class UserController extends Controller {
     const userCPf = request.body.cpf;
     if (!cpf.isValid(userCPf)) return response.send("invalid cpf");
 
-    // Prisma does't support @unique parameter on Mongodb yet,
-    // so, I have to do it manually
+    // -> Prisma does't support @unique parameter on Mongodb yet,
+    // -> so, I have to do it manually
 
     if (cpf.isValid(request.body.cpf)) return response.send("invalid cpf");
     const user = await super.GetByCPF(request);
-    if (user) return response.send("CPF is already in use");
+    if (user.error) response.send("<h3>Unable connct to server</h3>");
+    if (user.data) return response.send("CPF is already in use");
 
-    // Transform password in a hash
+    // -> Transform password in a hash
     request.body.password = this.HashPassword(request.body.password);
-    return await super.Create(request, response);
+
+    // -> Send data do crete user
+    const create = await super.Create(request, response);
+
+    response.send({ error: create.error, ...create.data });
   }
 
   async Login(request, response) {
@@ -66,6 +71,7 @@ class UserController extends Controller {
     const client = {
       id,
       name,
+      rule: "ADM",
     };
 
     // -> Generate a hash

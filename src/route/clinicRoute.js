@@ -1,6 +1,6 @@
 import Route from "express";
 import ClinicController from "../controller/clinicController.js";
-import { ClinicRules, ClinicValidation } from "../utils/auth.js";
+import { ClinicRules, ClinicValidation } from "../utils/clinicValidator.js";
 
 const route = Route();
 const clientController = new ClinicController();
@@ -23,7 +23,7 @@ route.delete(
   ClinicValidation,
   clientController.Delete.bind(clientController)
 );
-route.get("/find/:name", clientController.Seach.bind(clientController));
+route.get("/search", clientController.Search.bind(clientController));
 route.get("/get/:id", clientController.GetOne.bind(clientController));
 route.get("/all", clientController.GetAll.bind(clientController));
 
