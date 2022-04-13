@@ -1,14 +1,15 @@
-import { check, validationResult } from "express-validator";
+import { check, param, validationResult } from "express-validator";
 
 const ClinicRules = (url) => {
   switch (url) {
     case "new":
       {
         return [
-          check("name").isLength({ min: 5 }),
-          check("zipcode").isLength({ min: 6, max: 6 }),
-          check("address").isLength({ min: 10, max: 50 }),
-          check("number").isLength({ min: 1, max: 10 }),
+          check("name").trim().isLength({ min: 5 }),
+          check("zipcode").trim().isLength({ min: 8, max: 8 }),
+          check("address").trim().isLength({ min: 10, max: 50 }),
+          check("district").trim().isLength({ min: 10, max: 50 }),
+          check("number").trim().isLength({ min: 1, max: 10 }),
         ];
       }
       break;
@@ -25,10 +26,7 @@ const ClinicRules = (url) => {
       break;
     case "delete":
       {
-        return [
-          param("id").isString(),
-          check("cpf").isLength({ min: 11, max: 11 }),
-        ];
+        return [param("id").trim().isString()];
       }
       break;
   }

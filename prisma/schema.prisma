@@ -14,9 +14,11 @@ model Clinic {
   id        String    @id @default(auto()) @map("_id") @db.ObjectId
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+  refCode   String    @unique
   name      String
   zipcode   String
   address   String
+  district  String
   number    String
   Session   Session[]
 }

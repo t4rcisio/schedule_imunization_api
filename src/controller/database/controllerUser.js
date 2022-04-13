@@ -1,4 +1,4 @@
-import prisma from "../primsa.js";
+import prisma from "../../primsa.js";
 
 class Controller {
   constructor(colletion) {
@@ -14,6 +14,26 @@ class Controller {
     } catch (error) {
       clientData.data = error;
       clientData.data = true;
+    }
+
+    return clientData;
+  }
+
+  async Seach(request, response) {
+    let clientData = { data: "", error: "" };
+    const { name } = request.body;
+    try {
+      clientData.data = await this.client.findMany({
+        where: {
+          name: {
+            contains: name,
+          },
+        },
+      });
+      clientData.error = false;
+    } catch (error) {
+      clientData.data = error;
+      clientData.error = true;
     }
 
     return clientData;
@@ -79,7 +99,7 @@ class Controller {
       clientData.data = error;
       clientData.error = true;
     }
-
+    console.log(clientData);
     return clientData;
   }
 
