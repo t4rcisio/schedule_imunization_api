@@ -6,39 +6,6 @@ class Controller {
     this.client = prisma[colletion];
   }
 
-  async GetAll(request, response) {
-    let clientData = { data: "", error: "" };
-    try {
-      clientData.data = await this.client.findMany();
-      clientData.error = false;
-    } catch (error) {
-      clientData.data = error;
-      clientData.data = true;
-    }
-
-    return clientData;
-  }
-
-  async Seach(request, response) {
-    let clientData = { data: "", error: "" };
-    const { name } = request.body;
-    try {
-      clientData.data = await this.client.findMany({
-        where: {
-          name: {
-            contains: name,
-          },
-        },
-      });
-      clientData.error = false;
-    } catch (error) {
-      clientData.data = error;
-      clientData.error = true;
-    }
-
-    return clientData;
-  }
-
   async GetOne(request, response) {
     const { id } = request.params;
 

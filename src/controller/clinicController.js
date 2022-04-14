@@ -77,9 +77,17 @@ class ClinicController extends Controller {
     return response.send({ error: search.error, ...search.data });
   }
 
-  async CreateSession(request, response){
+  async GetAll(request, response) {
+    const search = await super.GetAll(request);
+
+    return response.send({ error: search.error, ...search.data });
+  }
+
+  async GetOne(request, response){
     
   }
+
+  async CreateSession(request, response) {}
 }
 
 export default ClinicController;
