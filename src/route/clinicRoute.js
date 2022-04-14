@@ -26,5 +26,9 @@ route.delete(
 route.get("/search", clientController.Search.bind(clientController));
 route.get("/get/:id", clientController.GetOne.bind(clientController));
 route.get("/all", clientController.GetAll.bind(clientController));
+route.post(
+  "/session/new/:id",
+  clientController.CreateSession.bind(clientController)
+);
 
 export default route;

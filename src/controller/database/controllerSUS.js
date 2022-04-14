@@ -15,7 +15,6 @@ class Controller {
       clientData.data = error;
       clientData.data = true;
     }
-
     return clientData;
   }
 
@@ -39,6 +38,21 @@ class Controller {
     return clientData;
   }
 
+  async FindByDate(date) {
+    let clientData = { data: "", error: "" };
+    try {
+      clientData.data = await this.client.findUnique({
+        where: { date },
+      });
+      clientData.error = false;
+    } catch (error) {
+      clientData.data = error;
+      clientData.error = true;
+    }
+
+    return clientData;
+  }
+
   async GetOne(request, response) {
     const { id } = request.params;
 
@@ -52,7 +66,7 @@ class Controller {
       clientData.data = error;
       clientData.error = true;
     }
-
+    console.log(clientData);
     return clientData;
   }
 
@@ -73,11 +87,11 @@ class Controller {
     return clientData;
   }
 
-  async Create(request, response) {
+  async Create(data) {
     let clientData = { data: "", error: "" };
     try {
       clientData.data = await this.client.create({
-        data: request.body,
+        data: data,
       });
       clientData.error = false;
     } catch (error) {
@@ -105,6 +119,26 @@ class Controller {
       clientData.error = true;
     }
 
+    return clientData;
+  }
+
+  async IncludSession(request) {
+    const { id } = request.params;
+    const { id_session } = request.body;
+    let clientData = { data: "", error: "" };
+    try {
+      clientData.data = await this.client.update({
+        where: {
+          id,
+        },
+        $push: { Patiete_session: id_session },
+      });
+      clientData.error = false;
+    } catch (error) {
+      clientData.data = error;
+      clientData.error = true;
+    }
+    console.log(clientData);
     return clientData;
   }
 
