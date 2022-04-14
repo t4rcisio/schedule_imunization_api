@@ -23,13 +23,11 @@ class Controller {
     return clientData;
   }
 
-  async GetByCPF(request) {
-    const { cpf } = request.body;
-
+  async GetByCPF(data) {
     let clientData = { data: "", error: "" };
     try {
       clientData.data = await this.client.findUnique({
-        where: { cpf },
+        ...data,
       });
       clientData.error = false;
     } catch (error) {

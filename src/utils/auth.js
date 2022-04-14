@@ -13,13 +13,13 @@ const UserAuth = (request, response, next) => {
     request.url === "/patient/new" ||
     request.url === "/clinic/new" ||
     request.url === "/clinic/search" ||
-    request.url === "/clinic/get/:id" ||
-    request.url === "/clinic/all"
+    request.url === "/clinic/get/" ||
+    request.url === "/clinic/all" ||
+    request.url.includes("/clinic/session/new/")
   )
     return next();
 
   const { auth_session } = request.cookies;
-
   if (!auth_session) return response.send("<h2>Go to login</h2>");
 
   try {

@@ -2,8 +2,11 @@ import Controller from "./database/controllerUser.js";
 import jsonwebtoken from "jsonwebtoken";
 import dotenv from "dotenv";
 import { response } from "express";
+import patientSessionController from "./patientSessionController.js";
 
 dotenv.config();
+const session = new patientSessionController();
+
 class PatientControl extends Controller {
   constructor() {
     super("Patient_user");
@@ -56,6 +59,22 @@ class PatientControl extends Controller {
     });
 
     this.ListSessions(user.data, response);
+  }
+
+  async PatientSessions(request, reponse) {
+    const { id } = request.params;
+    
+    const data = {
+      where: {
+        id,
+      },
+      include: {
+        patient_session: true,
+      },
+    };
+    const search = await super.GetByCPF(data);
+
+    return reponse.send(...search);
   }
 }
 

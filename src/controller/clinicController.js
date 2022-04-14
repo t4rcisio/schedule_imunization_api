@@ -2,11 +2,14 @@ import Controller from "./database/controllerSUS.js";
 import Joi from "joi";
 import dotenv from "dotenv";
 import jsonwebtoken from "jsonwebtoken";
+import sessionController from "./sessionController.js";
+import patientSessionController from "./patientSessionController.js";
 
 dotenv.config();
 
 const clinicSchema = Joi.object({});
-
+const sessionDb = new sessionController();
+const patientSession = new patientSessionController();
 class ClinicController extends Controller {
   constructor() {
     super("Clinic");
@@ -83,11 +86,28 @@ class ClinicController extends Controller {
     return response.send({ error: search.error, ...search.data });
   }
 
-  async GetOne(request, response){
-    
+  async CreateSession(request, response) {
+    const newSession = await sessionDb.Create(request);
+    if (newSession.error)
+      response.send({ error: true, message: "Unable to create Session" });
+
+    const body = {
+      sessionId: newSession.data.id,
+      patientId: request.body.patientId,
+    };
+
+    request.body = body;
+    const userSession = await patientSession.Create(request);
+
+    if (userSession.error)
+      response.send({ error: true, message: "Unable to create Session" });
+
+    response.send({ newSession, userSession });
   }
 
-  async CreateSession(request, response) {}
+  async FindSessionFullDate(request, response) {}
+  async FindSessionDate(request, response) {}
+  async GetAllSessions(request, response) {}
 }
 
 export default ClinicController;

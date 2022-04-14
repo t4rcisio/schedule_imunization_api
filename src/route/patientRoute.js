@@ -30,6 +30,9 @@ route.post(
   clientController.Login.bind(clientController)
 );
 
+route.get(
+  ":id/scheduled/sessions",
+  clientController.Login.bind(clientController)
+);
+
 export default route;
-
-
