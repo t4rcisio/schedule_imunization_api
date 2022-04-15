@@ -29,6 +29,7 @@ model Session {
   date             DateTime
   clinic           Clinic            @relation(fields: [clinicId], references: [id])
   clinicId         String            @db.ObjectId
+  count            Int               @default(0)
   Patiente_session Patient_session[]
 }
 
