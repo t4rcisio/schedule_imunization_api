@@ -54,12 +54,13 @@ model Patient_user {
 }
 
 model Nurse_user {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  name      String
-  cpf       String   @unique
-  password  String
+  id         String     @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  name       String
+  cpf        String     @unique
+  password   String
+  permission Permission @default(ADM)
 
 }
 
@@ -67,4 +68,8 @@ enum Status {
   Scheduled
   Done
   Canceled
+}
+
+enum Permission {
+  ADM
 }

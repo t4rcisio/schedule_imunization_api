@@ -2,112 +2,106 @@ import Controller from "./database/controller.js";
 import Joi from "joi";
 import dotenv from "dotenv";
 import jsonwebtoken from "jsonwebtoken";
-import sessionController from "./sessionController.js";
-import patientSessionController from "./patientSessionController.js";
 
 dotenv.config();
 
-const clinicSchema = Joi.object({});
-const sessionDb = new sessionController();
-const patientSession = new patientSessionController();
 class ClinicController extends Controller {
   constructor() {
     super("Clinic");
   }
 
-  VerifyToken(userToken) {
-    try {
-      const token = jsonwebtoken.verify(
-        userToken,
-        process.env.SECRET_KEY_TOKEN
-      );
-      return true;
-    } catch (error) {
-      return false;
-    }
-  }
-
   async Create(request, response) {
     // -> Verify refCode in body recived
-    const clinic = await super.GetByRef(request);
-    if (clinic.error) return response.send("<h3>Unable connct to server</h3>");
-    if (clinic.data) return response.send("<h3>This clinic already exist</h3>");
+    const { refCode } = request.body;
+    const params = {
+      where: {
+        refCode,
+      },
+    };
+    // Check if already registered
+    const clinic = await super.GetOne(params);
+    if (clinic.error)
+      response.send({ error: true, message: "Unable to connet server" });
+    if (clinic.data)
+      return response.send({ message: "This clinic already exist" });
 
-    const create = await super.Create(request);
+    // Generate a creation params
+    const { name, zipcode, address, district, number } = request.body;
+    const clinicParams = {
+      data: {
+        refCode,
+        name,
+        zipcode,
+        address,
+        district,
+        number,
+      },
+    };
+    const create = await super.Create(clinicParams);
 
-    return response.send({ error: create.error, ...create.data });
+    return response.send({ ...create.data });
   }
 
   async Update(request, response) {
-    const { id } = request.params;
+    const { clinicId } = request.body;
 
-    const clinic = await super.GetOne(request);
-    if (clinic.error) response.send("<h3>Unable connct to server</h3>");
-    if (!clinic.data) response.send("<h3>This clinic doesn't exist</h3>");
-
-    const { auth_session } = request.cookies;
-    if (!this.VerifyToken(auth_session))
-      response.send("Error to validate token");
-
-    const { rule } = jsonwebtoken.decode(auth_session);
-    if (!(rule === "ADM")) response.send("<h1>Permission Denied</h1>");
-
-    const update = await super.Update(request);
-
-    response.send({ error: update.error, ...update.data });
-  }
-
-  async Update(request, response) {
-    const clinic = await super.GetOne(request);
-    if (clinic.error) response.send("<h3>Unable connct to server</h3>");
-    if (!clinic.data) response.send("<h3>This clinic doesn't exist</h3>");
-
-    const { auth_session } = request.cookies;
-    if (!this.VerifyToken(auth_session))
-      response.send("Error to validate token");
-
-    const { rule } = jsonwebtoken.decode(auth_session);
-    if (!(rule === "ADM")) response.send("<h1>Permission Denied</h1>");
-
-    const update = await super.Delete(request);
-
-    response.send({ error: update.error, ...update.data });
-  }
-
-  async Search(request, response) {
-    const search = await super.Search(request);
-
-    return response.send({ error: search.error, ...search.data });
-  }
-
-  async GetAll(request, response) {
-    const search = await super.GetAll(request);
-
-    return response.send({ error: search.error, ...search.data });
-  }
-
-  async CreateSession(request, response) {
-    const newSession = await sessionDb.Create(request);
-    if (newSession.error)
-      response.send({ error: true, message: "Unable to create Session" });
-
-    const body = {
-      sessionId: newSession.data.id,
-      patientId: request.body.patientId,
+    const params = {
+      where: {
+        id: clinicId,
+      },
     };
 
-    request.body = body;
-    const userSession = await patientSession.Create(request);
+    const clinic = await super.GetOne(params);
+    if (clinic.error)
+      response.send({ error: true, message: "Unable to connet server" });
+    if (!clinic.data)
+      return response.send({ message: "This clinic doesn't exist" });
 
-    if (userSession.error)
-      response.send({ error: true, message: "Unable to create Session" });
+    // Generate a creation params
+    const { name, zipcode, address, district, number } = request.body;
+    const clinicParams = {
+      where: {
+        id: clinicId,
+      },
+      data: {
+        refCode,
+        name,
+        zipcode,
+        address,
+        district,
+        number,
+      },
+    };
+    const create = await super.Update(clinicParams);
 
-    response.send({ newSession, userSession });
+    return response.send({ ...create.data });
   }
 
-  async FindSessionFullDate(request, response) {}
-  async FindSessionDate(request, response) {}
-  async GetAllSessions(request, response) {}
+  async Delete(request, response) {
+    const { clinicId } = request.body;
+
+    const params = {
+      where: {
+        id: clinicId,
+      },
+    };
+
+    const clinic = await super.GetOne(params);
+    if (clinic.error)
+      response.send({ error: true, message: "Unable to connet server" });
+    if (!clinic.data)
+      return response.send({ message: "This clinic doesn't exist" });
+
+    const deletionParams = {
+      where: {
+        id: clinicId,
+      },
+    };
+
+    const deletion = await super.Delete(deletionParams);
+
+    response.send({ ...deletion.data });
+  }
 }
 
 export default ClinicController;

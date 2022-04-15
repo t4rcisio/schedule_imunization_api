@@ -11,7 +11,7 @@ route.post(
   NurseValidation, // Validate body before processing request
   clientController.Create.bind(clientController)
 );
-route.get(
+route.post(
   "/edit/:id",
   NurseRules("edit"),
   NurseValidation, // Validate body before processing request
@@ -23,7 +23,7 @@ route.delete(
   NurseValidation,
   clientController.Delete.bind(clientController)
 );
-route.get(
+route.post(
   "/login",
   NurseRules("login"),
   NurseValidation,

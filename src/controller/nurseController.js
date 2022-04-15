@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import Controller from "./database/controller.js";
 import jsonwebtoken from "jsonwebtoken";
 import dotenv from "dotenv";
-import { cpf } from "cpf-cnpj-validator";
+import { cpf as cpfValidator } from "cpf-cnpj-validator";
 
 import Joi from "joi";
 dotenv.config();
@@ -30,35 +30,59 @@ class UserController extends Controller {
   }
 
   async Create(request, response) {
-    const userCPf = request.body.cpf;
-    if (!cpf.isValid(userCPf)) return response.send("invalid cpf");
+    //
+    // Verify if cpf has a valid format
+    const { cpf } = request.body;
+    if (!cpfValidator.isValid(cpf))
+      return response.send({ error: "invalid cpf format" });
 
-    // -> Prisma does't support @unique parameter on Mongodb yet,
+    // -> Prisma doesn't support @unique parameter on Mongodb yet,
     // -> so, I have to do it manually
+    const params = {
+      where: {
+        cpf,
+      },
+    };
+    const user = await super.GetOne(params);
+    if (user.error)
+      response.send({ error: true, message: "Unable to connet server" });
+    if (user.data)
+      return response.send({ error: true, message: "cpf already exist" });
 
-    if (cpf.isValid(request.body.cpf)) return response.send("invalid cpf");
-    const user = await super.GetByCPF(request);
-    if (user.error) response.send("<h3>Unable connct to server</h3>");
-    if (user.data) return response.send("CPF is already in use");
-
-    // -> Transform password in a hash
-    request.body.password = this.HashPassword(request.body.password);
-
+    // Generate build params
+    const { name, password } = request.body;
+    const nurseParams = {
+      data: {
+        name,
+        cpf,
+        password: this.HashPassword(password),
+        oldPassword: this.HashPassword(password),
+      },
+    };
     // -> Send data do crete user
-    const create = await super.Create(request, response);
+    const create = await super.Create(nurseParams);
 
-    response.send({ error: create.error, ...create.data });
+    response.send({ ...create.data });
   }
 
   async Login(request, response) {
-    // -> Find user on db
-    const user = await super.Login(request);
+    // Verify if cpf has a valid format
+    const { cpf } = request.body;
+    if (!cpfValidator.isValid(cpf))
+      return response.send({ error: "invalid cpf format" });
 
+    // -> Prisma doesn't support @unique parameter on Mongodb yet,
+    // -> so, I have to do it manually
+    const params = {
+      where: {
+        cpf,
+      },
+    };
+    const user = await super.GetOne(params);
     if (user.error)
-      return response.json({ error: "Unable to connect data server" });
+      response.send({ error: true, message: "Unable to connet server" });
     if (!user.data)
-      // -> cpf does't match
-      return response.send({ error: "Incorrect login or password" });
+      return response.send({ message: "Incorrect login or password" });
 
     // -> Verify recived password
     const { password } = request.body;
@@ -67,11 +91,11 @@ class UserController extends Controller {
     if (!hash) return response.send({ error: "Incorrect login or password" });
 
     // -> buid a payload
-    const { id, name } = user.data;
+    const { id, name, permission } = user.data;
     const client = {
       id,
       name,
-      rule: "ADM",
+      permission,
     };
 
     // -> Generate a hash
@@ -91,17 +115,28 @@ class UserController extends Controller {
   }
 
   async Update(request, response) {
-    // -> Find user bay id url parameter
-    const user = await super.GetOne(request);
-    if (user.error || !user.data) response.send("<h1>user not found 1</h1>");
-
-    // -> Verify token authenticity
+    //
+    // For security reasons, compare id received on parameters with id stored on token
+    // this way, i garant that user has permission do to this changes.
+    // auth.js middleware already checked signature of token, now, just decode hash
+    //
     const { auth_session } = request.cookies;
-    if (!this.VerifyToken(auth_session))
-      response.send("Error to validate token");
+    const token = jsonwebtoken.decode(auth_session);
+    const { id } = request.params;
+    const tokenId = token.id;
+    if (!(id === tokenId))
+      response.send({ error: true, message: "unauthorized" });
 
-    // -> Decode payload
-    const payload = jsonwebtoken.decode(auth_session);
+    const params = {
+      where: {
+        id,
+      },
+    };
+
+    // -> Find user bay id url parameter
+    const user = await super.GetOne(params);
+    if (user.error || !user.data)
+      response.send({ error: "Unable to connect server" });
 
     // -> Before aplly updates, analyze body password
     const { password } = request.body;
@@ -111,24 +146,51 @@ class UserController extends Controller {
     const hash = bcrypt.compareSync(password, passHash);
     if (!hash) return response.send({ error: "Incorrect password" });
 
-    // Send data to update
-    const update = await super.Update(request, response);
+    // If all ok, next to apply update
+    const { newPassword, name, cpf } = request.body;
 
-    response.send({ success: update.error, ...update.data });
+    const updateParams = {
+      where: {
+        id,
+      },
+      data: {
+        name,
+        cpf,
+        password: newPassword
+          ? this.HashPassword(newPassword)
+          : user.data.password,
+      },
+    };
+
+    // Send data to update
+    const update = await super.Update(updateParams);
+
+    response.send({ ...update.data });
   }
 
   async Delete(request, response) {
-    // -> Find user bay id url parameter
-    const user = await super.GetOne(request);
-    if (user.error || !user.data) response.send("<h1>user not found 1</h1>");
-
-    // -> Verify token authenticity
+    //
+    // For security reasons, compare id received on parameters with id stored on token
+    // this way, i garant that user has permission do to this changes.
+    // auth.js middleware already checked signature of token, now, just decode hash
+    //
     const { auth_session } = request.cookies;
-    if (!this.VerifyToken(auth_session))
-      response.send("Error to validate token");
+    const token = jsonwebtoken.decode(auth_session);
+    const { id } = request.params;
+    const tokenId = token.id;
+    if (!(id === tokenId))
+      response.send({ error: true, message: "unauthorized" });
 
-    // -> Decode payload
-    const payload = jsonwebtoken.decode(auth_session);
+    const params = {
+      where: {
+        id,
+      },
+    };
+
+    // -> Find user bay id url parameter
+    const user = await super.GetOne(params);
+    if (user.error || !user.data)
+      response.send({ error: "Unable to connect server" });
 
     // -> Before aplly updates, analyze body password
     const { password } = request.body;
@@ -138,11 +200,19 @@ class UserController extends Controller {
     const hash = bcrypt.compareSync(password, passHash);
     if (!hash) return response.send({ error: "Incorrect password" });
 
-    // Senda data to delete
-    const update = await super.Delete(request, response);
+    const deleteParams = {
+      where: {
+        id,
+      },
+    };
+    const deleting = await super.Delete(deleteParams);
 
-    response.send({ success: update.error, ...update.data });
+    response.send({ ...deleting.data });
   }
+  
+
+
+
 }
 
 export default UserController;
