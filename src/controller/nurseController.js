@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import Controller from "./database/controllerUser.js";
+import Controller from "./database/controller.js";
 import jsonwebtoken from "jsonwebtoken";
 import dotenv from "dotenv";
 import { cpf } from "cpf-cnpj-validator";

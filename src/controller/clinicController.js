@@ -1,4 +1,4 @@
-import Controller from "./database/controllerSUS.js";
+import Controller from "./database/controller.js";
 import Joi from "joi";
 import dotenv from "dotenv";
 import jsonwebtoken from "jsonwebtoken";

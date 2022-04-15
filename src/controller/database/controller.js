@@ -6,24 +6,7 @@ class Controller {
     this.client = prisma[colletion];
   }
 
-  async GetOne(request, response) {
-    const { id } = request.params;
-
-    let clientData = { data: "", error: "" };
-    try {
-      clientData.data = await this.client.findUnique({
-        where: { id },
-      });
-      clientData.error = false;
-    } catch (error) {
-      clientData.data = error;
-      clientData.error = true;
-    }
-
-    return clientData;
-  }
-
-  async GetByCPF(data) {
+  async GetOne(data) {
     let clientData = { data: "", error: "" };
     try {
       clientData.data = await this.client.findUnique({
@@ -37,27 +20,11 @@ class Controller {
     return clientData;
   }
 
-  async Login(request, response) {
-    const { cpf } = request.body;
-
-    let clientData = { data: "", error: "" };
-    try {
-      clientData.data = await this.client.findUnique({
-        where: { cpf },
-      });
-      clientData.error = false;
-    } catch (error) {
-      clientData.data = error;
-      clientData.error = true;
-    }
-    return clientData;
-  }
-
-  async Create(request, response) {
+  async Create(data) {
     let clientData = { data: "", error: "" };
     try {
       clientData.data = await this.client.create({
-        data: request.body,
+        ...data,
       });
       clientData.error = false;
     } catch (error) {
@@ -68,16 +35,11 @@ class Controller {
     return clientData;
   }
 
-  async Update(request, response) {
-    const { id } = request.params;
-
+  async Update(data) {
     let clientData = { data: "", error: "" };
     try {
       clientData.data = await this.client.update({
-        data: request.body,
-        where: {
-          id,
-        },
+        ...data,
       });
       clientData.error = false;
     } catch (error) {
@@ -88,13 +50,12 @@ class Controller {
     return clientData;
   }
 
-  async Delete(request, response) {
+  async Delete(data) {
     const { id } = request.params;
     let clientData = { data: "", error: "" };
-
     try {
       clientData = await this.client.delete({
-        where: { id },
+        ...data,
       });
       clientData.error = false;
     } catch (error) {
