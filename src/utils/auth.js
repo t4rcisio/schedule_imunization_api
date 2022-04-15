@@ -6,16 +6,11 @@ dotenv.config();
 const UserAuth = (request, response, next) => {
   console.log(request.url);
   if (
-    request.url === "/nurse/create" ||
+    request.url === "/nurse/new" ||
     request.url === "/nurse/login" ||
     request.url === "/" ||
     request.url === "/patient/login" ||
-    request.url === "/patient/new" ||
-    request.url === "/clinic/new" ||
-    request.url === "/clinic/search" ||
-    request.url === "/clinic/get/" ||
-    request.url === "/clinic/all" ||
-    request.url.includes("/clinic/session/new/")
+    request.url === "/patient/new"
   )
     return next();
 

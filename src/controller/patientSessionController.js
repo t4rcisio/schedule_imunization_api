@@ -11,6 +11,10 @@ class PatientSessionController extends Controller {
   constructor() {
     super("Patient_session");
   }
+
+  
+
+
 }
 
 export default PatientSessionController;

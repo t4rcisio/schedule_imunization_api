@@ -15,7 +15,7 @@ class PatientControl extends Controller {
 
   async Create(request, response) {
     //
-    // Prisma does't support @unique parameter on Mongodb yet,
+    // Prisma doesn't support @unique parameter on Mongodb yet,
     // so, I have to do it manually
     //
     const { cpf } = request.body;
@@ -114,11 +114,11 @@ class PatientControl extends Controller {
     const user = await super.GetOne(data);
     if (user.error)
       response.send({ error: true, message: "Unable to connet server" });
-    if (user.data)
+    if (!user.data)
       return response.send({ error: true, message: "cpf doesn't exist" });
 
     // If find it, create a payload to generate the cookie token
-    const { id, name } = user.data;
+    const { id, name, birthday } = user.data;
     const client = {
       id,
       name,
