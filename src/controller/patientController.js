@@ -148,12 +148,7 @@ class PatientControl extends Controller {
         session: true,
       },
     };
-    const patientSession = await super.GetOne(data);
-    
-    session
-
-
-
+    const search = await super.GetOne(data);
 
     return response.send({ ...search.data });
   }
