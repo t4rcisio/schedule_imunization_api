@@ -13,18 +13,13 @@ const UserAuth = (request, response, next) => {
   )
     return next();
 
-  // console.log(request.headers);
-  return next();
-  const { auth_session } = request.cookies;
-  if (!auth_session) return response.send("<h2>Go to login</h2>");
+  const { token } = request.headers;
+  if (!token) return response.send({ error: "Login required" }).status(403);
 
   try {
-    const token = jsonwebtoken.verify(
-      auth_session,
-      process.env.SECRET_KEY_TOKEN
-    );
+    const userAuth = jsonwebtoken.verify(token, process.env.SECRET_KEY_TOKEN);
   } catch (error) {
-    return response.send("Invalid token");
+    return response.send({ error: "Session expired" }).status(403);
   }
   return next();
 };

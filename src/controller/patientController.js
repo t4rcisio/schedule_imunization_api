@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import patientSessionController from "./patientSessionController.js";
 import sessionController from "./sessionController.js";
 import { cpf as cpfLib } from "cpf-cnpj-validator";
+import Decode from "../utils/tokenDecode.js";
 
 dotenv.config();
 const patientSessionDB = new patientSessionController();
@@ -134,8 +135,10 @@ class PatientControl extends Controller {
     response.send({ token });
   }
 
-  async PatientSessions(request, reponse) {
-    const { id } = request.params;
+  async PatientSessions(request, response) {
+    const { id } = Decode(request.headers);
+    if (!id)
+      return response.send({ error: "Failed to read token" }).status(403);
 
     const data = {
       where: {
@@ -145,9 +148,14 @@ class PatientControl extends Controller {
         session: true,
       },
     };
-    const search = await super.GetOne(data);
+    const patientSession = await super.GetOne(data);
+    
+    session
 
-    return reponse.send({ ...search });
+
+
+
+    return response.send({ ...search.data });
   }
 
   async SessionInclude(request, session, response) {
