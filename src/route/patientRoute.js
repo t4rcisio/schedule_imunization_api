@@ -31,8 +31,8 @@ route.post(
 );
 
 route.get(
-  ":id/scheduled/sessions",
-  clientController.Login.bind(clientController)
+  "/sessions/scheduled/:id",
+  clientController.PatientSessions.bind(clientController)
 );
 
 export default route;

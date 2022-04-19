@@ -17,6 +17,7 @@ class Controller {
       clientData.data = error;
       clientData.error = true;
     }
+    console.log(clientData);
     return clientData;
   }
 
