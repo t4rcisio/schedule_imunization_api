@@ -31,7 +31,7 @@ route.post(
 );
 
 route.get(
-  "/sessions/scheduled/:id",
+  "/sessions/scheduled",
   clientController.PatientSessions.bind(clientController)
 );
 
