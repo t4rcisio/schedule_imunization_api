@@ -4,14 +4,15 @@ import url from "url";
 import cookieParser from "cookie-parser";
 import route from "./route/route.js";
 import userAuth from "./utils/auth.js";
+import cors from "cors";
 
 dotenv.config();
 
 const port = process.env.SERVER_PORT || 5000;
 const app = express();
-
-app.use(express.json());
 app.use(cookieParser());
+app.use(cors());
+app.use(express.json());
 app.use(userAuth);
 app.use(route);
 

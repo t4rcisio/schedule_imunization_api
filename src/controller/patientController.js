@@ -42,7 +42,8 @@ class PatientControl extends Controller {
       data: { name, birthday: new Date(birthday), cpf },
     };
     const newuser = await super.Create(params);
-    return response.send({ ...newuser.data });
+
+    return this.Login(request, response);
   }
 
   async Update(request, response) {
@@ -113,7 +114,7 @@ class PatientControl extends Controller {
     };
     const user = await super.GetOne(data);
     if (user.error)
-      response.send({ error: true, message: "Unable to connet server" });
+      return response.send({ error: true, message: "Unable to connet server" });
     if (!user.data)
       return response.send({ error: true, message: "cpf doesn't exist" });
 
@@ -130,15 +131,7 @@ class PatientControl extends Controller {
       expiresIn: "8h",
     });
 
-    // Store hash on cookie database
-    response.cookie(process.env.COOKIE_KEY, token, {
-      maxAge: 60 * 60 * 8,
-      httpOnly: true,
-      secure: true,
-      path: "/",
-    });
-
-    response.send({ ...client });
+    response.send({ token });
   }
 
   async PatientSessions(request, reponse) {
@@ -149,12 +142,12 @@ class PatientControl extends Controller {
         id,
       },
       include: {
-        patient_session: true,
+        session: true,
       },
     };
     const search = await super.GetOne(data);
 
-    return reponse.send(...search);
+    return reponse.send({ ...search });
   }
 
   async SessionInclude(request, session, response) {

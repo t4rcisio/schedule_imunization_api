@@ -4,7 +4,6 @@ import jsonwebtoken from "jsonwebtoken";
 dotenv.config();
 
 const UserAuth = (request, response, next) => {
-  console.log(request.url);
   if (
     request.url === "/nurse/new" ||
     request.url === "/nurse/login" ||
@@ -14,6 +13,8 @@ const UserAuth = (request, response, next) => {
   )
     return next();
 
+  // console.log(request.headers);
+  return next();
   const { auth_session } = request.cookies;
   if (!auth_session) return response.send("<h2>Go to login</h2>");
 
