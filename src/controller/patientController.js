@@ -33,7 +33,7 @@ class PatientControl extends Controller {
     // Find it
     const user = await super.GetOne(data);
     if (user.error)
-      response.send({ error: true, message: "Unable to connet server" });
+      return response.send({ error: true, message: "Unable to connet server" });
     if (user.data)
       return response.send({ error: true, message: "cpf already exist" });
 
@@ -59,7 +59,7 @@ class PatientControl extends Controller {
     const tokenId = token.id;
 
     if (!(id === tokenId))
-      response.send({ error: true, message: "unauthorized" });
+      return response.send({ error: true, message: "unauthorized" });
 
     // If all ok, continue to aply changes
     const { name, cpf, birthday } = request.body;
@@ -75,7 +75,7 @@ class PatientControl extends Controller {
     };
     const update = await super.Update(params);
 
-    response.send({ ...update });
+    return response.send({ ...update });
   }
 
   async Delete(request, response) {
@@ -90,7 +90,7 @@ class PatientControl extends Controller {
     const tokenId = token.id;
 
     if (!(id === tokenId))
-      response.send({ error: true, message: "unauthorized" });
+      return response.send({ error: true, message: "unauthorized" });
 
     const params = {
       where: {
@@ -100,7 +100,7 @@ class PatientControl extends Controller {
 
     const deletion = await super.Delete(params);
 
-    response.send({ ...deletion });
+    return response.send({ ...deletion });
   }
 
   async Login(request, response) {
@@ -132,7 +132,7 @@ class PatientControl extends Controller {
       expiresIn: "8h",
     });
 
-    response.send({ token });
+    return response.send({ token });
   }
 
   async PatientSessions(request, response) {
@@ -145,7 +145,15 @@ class PatientControl extends Controller {
         id,
       },
       include: {
-        session: true,
+        session: {
+          include: {
+            Session: {
+              include: {
+                clinic: true,
+              },
+            },
+          },
+        },
       },
     };
     const search = await super.GetOne(data);
@@ -162,14 +170,14 @@ class PatientControl extends Controller {
 
     // Now, generate association params to add user on session
     const sessionId = session.id;
-    const { patientId } = request.body;
+    const { id } = Decode(request.headers);
     const params = {
       data: {
         Session: {
           connect: { id: sessionId },
         },
         Patient: {
-          connect: { id: patientId },
+          connect: { id: id },
         },
       },
     };
@@ -183,7 +191,7 @@ class PatientControl extends Controller {
     session.counter = session.counter + 1;
     session.save();
 
-    response.send({ ...userSession.data });
+    return response.send({ ...userSession.data });
   }
 
   async SessionCreate(request, response) {
@@ -194,7 +202,7 @@ class PatientControl extends Controller {
     const sysdate = new Date(); // Get today date time
     const today = sysdate.toLocaleDateString(); // get just date
 
-    // Atendance time
+    // Attendance time
     const begin = new Date(today + " " + process.argv.START);
     const end = new Date(today + " " + process.argv.END);
 
@@ -202,7 +210,7 @@ class PatientControl extends Controller {
     date = new Date(date);
     // Check limits
     if (!(date >= begin && date <= end))
-      response.send({ error: "date out of attendances limits" });
+      return response.send({ error: "date out of attendances limits" });
 
     // Generate creation params
     const params = {
@@ -227,15 +235,15 @@ class PatientControl extends Controller {
     //
     const { date } = request.body;
     // Convert string to date
-    date = new Date(date);
+    const ndate = new Date(date);
     const params = {
       where: {
-        date,
+        date: ndate,
       },
     };
     const sessionData = await sessionDB.GetOne(params);
     if (sessionData.error)
-      response.send({ error: true, message: "Unable to connet server" });
+      return response.send({ error: true, message: "Unable to connet server" });
     if (sessionData.data)
       // Just create a new patientSession
       return await this.SessionInclude(request, sessionData.data, response);
@@ -246,13 +254,10 @@ class PatientControl extends Controller {
   }
 
   async SessionDelete(request, response) {
-    const { auth_session } = request.cookies;
-    const token = jsonwebtoken.decode(auth_session);
     const { id } = request.params;
-    const tokenId = token.id;
-
-    if (!(id === tokenId))
-      response.send({ error: true, message: "unauthorized" });
+    const usrId = Decode(request.headers).id;
+    if (!usrId)
+      return response.send({ error: "Failed to read token" }).status(403);
 
     const patientParams = {
       where: {
@@ -262,7 +267,7 @@ class PatientControl extends Controller {
 
     const patientSession = await patientSessionDB.Delete(patientParams);
 
-    if (patientSession.error)
+    if (patientSession.error || !patientSession.data)
       response.send({ error: true, message: "Unable to connet server" });
 
     const { sessionId } = patientSession.data;

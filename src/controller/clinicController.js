@@ -88,7 +88,7 @@ class ClinicController extends Controller {
 
     const clinic = await super.GetOne(params);
     if (clinic.error)
-      response.send({ error: true, message: "Unable to connet server" });
+      return response.send({ error: true, message: "Unable to connet server" });
     if (!clinic.data)
       return response.send({ message: "This clinic doesn't exist" });
 
@@ -101,6 +101,19 @@ class ClinicController extends Controller {
     const deletion = await super.Delete(deletionParams);
 
     response.send({ ...deletion.data });
+  }
+
+  async GetMany(request, response) {
+    const clinic = await super.GetMany();
+    if (clinic.error)
+      return response.send({ error: true, message: "Unable to connet server" });
+    if (!clinic.data)
+      return response.send({
+        error: true,
+        message: "This clinic doesn't exist",
+      });
+
+    response.send({ ...clinic.data });
   }
 }
 
