@@ -52,12 +52,24 @@ class Controller {
   }
 
   async Delete(data) {
-    const { id } = request.params;
     let clientData = { data: "", error: "" };
     try {
-      clientData = await this.client.delete({
+      clientData.data = await this.client.delete({
         ...data,
       });
+      clientData.error = false;
+    } catch (error) {
+      clientData.data = error;
+      clientData.error = true;
+    }
+
+    return clientData;
+  }
+
+  async GetMany() {
+    let clientData = { data: "", error: "" };
+    try {
+      clientData.data = await this.client.findMany({});
       clientData.error = false;
     } catch (error) {
       clientData.data = error;

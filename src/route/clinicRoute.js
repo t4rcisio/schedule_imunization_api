@@ -24,4 +24,6 @@ route.delete(
   clientController.Delete.bind(clientController)
 );
 
+route.get("/all", clientController.GetMany.bind(clientController));
+
 export default route;
