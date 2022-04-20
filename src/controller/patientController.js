@@ -138,14 +138,16 @@ class PatientControl extends Controller {
   async PatientSessions(request, response) {
     const { id } = Decode(request.headers);
     if (!id)
-      return response.send({ error: "Failed to read token" }).status(403);
+      return response
+        .send({ error: true, message: "Failed to read token" })
+        .status(403);
 
     const data = {
       where: {
         id,
       },
       include: {
-        session: {
+        patient_session: {
           include: {
             Session: {
               include: {
@@ -166,7 +168,7 @@ class PatientControl extends Controller {
     // The system was projected allow two patients per session
     //
     if (session.count >= 2)
-      return response.send({ message: "This session is full" });
+      return response.send({ error: true, message: "This session is full" });
 
     // Now, generate association params to add user on session
     const sessionId = session.id;
@@ -185,37 +187,54 @@ class PatientControl extends Controller {
     // Create a new patientSession
     const userSession = await patientSessionDB.Create(params);
     if (userSession.error)
-      return response.send({ error: "Unable to server connect" });
+      return response.send({
+        error: true,
+        message: "Unable to server connect",
+      });
 
     // Update session
-    session.counter = session.counter + 1;
-    session.save();
+
+    const sessionParams = {
+      where: {
+        id: session.id,
+      },
+      data: {
+        count: session.count + 1,
+      },
+    };
+
+    console.log(sessionParams);
+    const sessionUpdate = await sessionDB.Update(sessionParams);
 
     return response.send({ ...userSession.data });
   }
 
   async SessionCreate(request, response) {
-    const { date, clinicId } = request.body;
+    const { date, time, clinicId } = request.body;
     //
     // The system was projected to allow twenty attendaces per day
     //
-    const sysdate = new Date(); // Get today date time
-    const today = sysdate.toLocaleDateString(); // get just date
 
     // Attendance time
-    const begin = new Date(today + " " + process.argv.START);
-    const end = new Date(today + " " + process.argv.END);
+    const begin = new Date(date + " " + process.env.START + " GMT");
+    const end = new Date(date + " " + process.env.END + " GMT");
 
     // date time received
-    date = new Date(date);
+    const ndate = new Date(date + " " + time + " GMT");
     // Check limits
-    if (!(date >= begin && date <= end))
-      return response.send({ error: "date out of attendances limits" });
+    if (!(ndate >= begin && ndate <= end))
+      return response.send({
+        error: "date out of attendances limits",
+        begin: begin,
+        end: end,
+        ndate: ndate,
+      });
 
     // Generate creation params
     const params = {
       data: {
-        date,
+        date: ndate,
+        count: 0,
         clinic: {
           connect: { id: clinicId },
         },
@@ -224,7 +243,10 @@ class PatientControl extends Controller {
 
     const session = await sessionDB.Create(params);
     if (session.error)
-      return response.send({ error: "Unable to server connect" });
+      return response.send({
+        error: true,
+        message: "Unable to server connect",
+      });
 
     return await this.SessionInclude(request, session.data, response);
   }
@@ -233,22 +255,21 @@ class PatientControl extends Controller {
     //
     // First, check if already exist a session with same date
     //
-    const { date } = request.body;
+    const { date, time } = request.body;
     // Convert string to date
-    const ndate = new Date(date);
+    const ndate = new Date(date + " " + time + " GMT");
     const params = {
       where: {
         date: ndate,
       },
     };
-    const sessionData = await sessionDB.GetOne(params);
+    const sessionData = await sessionDB.Find(params);
     if (sessionData.error)
       return response.send({ error: true, message: "Unable to connet server" });
     if (sessionData.data)
       // Just create a new patientSession
       return await this.SessionInclude(request, sessionData.data, response);
-
-    if (!sessionData.data)
+    else if (!sessionData.data)
       // Create a new Session, then call SessionInclude function
       return await this.SessionCreate(request, response);
   }
@@ -257,7 +278,9 @@ class PatientControl extends Controller {
     const { id } = request.params;
     const usrId = Decode(request.headers).id;
     if (!usrId)
-      return response.send({ error: "Failed to read token" }).status(403);
+      return response
+        .send({ error: true, message: "Failed to read token" })
+        .status(403);
 
     const patientParams = {
       where: {
@@ -282,8 +305,16 @@ class PatientControl extends Controller {
     if (session.error)
       response.send({ error: true, message: "Unable to connet server" });
 
-    session.data.count = session.data.count - 1;
-    session.data.save();
+    const sessionUpdateParams = {
+      where: {
+        id: session.data.id,
+      },
+      data: {
+        count: session.data.count - 1,
+      },
+    };
+
+    const sessionUpdate = await sessionDB.Update(sessionUpdateParams);
 
     response.send({ ...patientSession.data });
   }

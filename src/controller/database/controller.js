@@ -65,6 +65,20 @@ class Controller {
 
     return clientData;
   }
+  async Find(data) {
+    let clientData = { data: "", error: "" };
+    try {
+      clientData.data = await this.client.findFirst({
+        ...data,
+      });
+      clientData.error = false;
+    } catch (error) {
+      clientData.data = error;
+      clientData.error = true;
+    }
+    console.log(clientData);
+    return clientData;
+  }
 
   async GetMany() {
     let clientData = { data: "", error: "" };
