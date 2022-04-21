@@ -12,7 +12,7 @@ route.post(
   clientController.Create.bind(clientController)
 );
 route.post(
-  "/edit/:id",
+  "/edit",
   PatientRules("edit"),
   PatientValidation,
   clientController.Update.bind(clientController)
@@ -29,6 +29,7 @@ route.post(
   PatientValidation,
   clientController.Login.bind(clientController)
 );
+
 
 route.get(
   "/sessions/scheduled",

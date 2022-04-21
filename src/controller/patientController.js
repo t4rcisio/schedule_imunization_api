@@ -53,16 +53,18 @@ class PatientControl extends Controller {
     // this way, i garant that user has permission do to this changes.
     // auth.js middleware already checked signature of token, now, just decode hash
     //
-    const { auth_session } = request.cookies;
-    const token = jsonwebtoken.decode(auth_session);
-    const { id } = request.params;
-    const tokenId = token.id;
-
-    if (!(id === tokenId))
-      return response.send({ error: true, message: "unauthorized" });
+    const { id } = Decode(request.headers);
+    if (!id)
+      return response
+        .send({ error: true, message: "Failed to read token" })
+        .status(403);
 
     // If all ok, continue to aply changes
     const { name, cpf, birthday } = request.body;
+
+    if (!cpfLib.isValid(cpf))
+      return response.send({ error: true, message: "cpf invald format" });
+
     const params = {
       where: {
         id,
@@ -74,8 +76,10 @@ class PatientControl extends Controller {
       },
     };
     const update = await super.Update(params);
+    if (update.error)
+      return response.send({ error: true, message: "Can't apply changes" });
 
-    return response.send({ ...update });
+    return response.send({ message: "updated" });
   }
 
   async Delete(request, response) {
@@ -124,6 +128,7 @@ class PatientControl extends Controller {
     const client = {
       id,
       name,
+      cpf,
       birthday,
     };
 
@@ -293,6 +298,7 @@ class PatientControl extends Controller {
     if (patientSession.error || !patientSession.data)
       response.send({ error: true, message: "Unable to connet server" });
 
+    console.log({ DATA: patientSession.data });
     const { sessionId } = patientSession.data;
 
     const sessionParams = {
