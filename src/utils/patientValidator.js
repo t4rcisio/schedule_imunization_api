@@ -15,7 +15,6 @@ const PatientRules = (url) => {
     case "edit":
       {
         return [
-          param("id").isString(),
           check("name").isLength({ min: 2 }),
           check("birthday").isISO8601().toDate(),
           check("cpf").isLength({ min: 11, max: 11 }),
@@ -40,7 +39,7 @@ const PatientRules = (url) => {
 
 const PatientValidation = (request, response, next) => {
   const errorRules = validationResult(request);
-
+  console.log(errorRules);
   if (!errorRules.isEmpty())
     return response.send({ error: "Missing body huuuparams" }).status(422);
 
