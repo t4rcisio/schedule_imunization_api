@@ -30,4 +30,11 @@ route.post(
   clientController.Login.bind(clientController)
 );
 
+route.post("/search", clientController.Search.bind(clientController));
+
+route.post(
+  "/session/confirm",
+  clientController.ChangState.bind(clientController)
+);
+
 export default route;

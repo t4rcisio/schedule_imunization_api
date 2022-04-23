@@ -3,6 +3,7 @@ import Joi from "joi";
 import dotenv from "dotenv";
 import jsonwebtoken from "jsonwebtoken";
 
+
 dotenv.config();
 
 class ClinicController extends Controller {
@@ -104,7 +105,7 @@ class ClinicController extends Controller {
   }
 
   async GetMany(request, response) {
-    const clinic = await super.GetMany();
+    const clinic = await super.GetMany({});
     if (clinic.error)
       return response.send({ error: true, message: "Unable to connet server" });
     if (!clinic.data)
