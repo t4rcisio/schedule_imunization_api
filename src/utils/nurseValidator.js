@@ -52,7 +52,9 @@ const NurseRules = (url) => {
 const NurseValidation = (request, response, next) => {
   const errorRules = validationResult(request);
   if (!errorRules.isEmpty())
-    return response.send("<h2>Failed to process request</h2>").status(422);
+    return response
+      .send({ error: true, message: "invalid params" })
+      .status(422);
 
   next();
 };

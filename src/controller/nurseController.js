@@ -3,9 +3,14 @@ import Controller from "./database/controller.js";
 import jsonwebtoken from "jsonwebtoken";
 import dotenv from "dotenv";
 import { cpf as cpfValidator } from "cpf-cnpj-validator";
+import patientSessionController from "./patientSessionController.js";
+import sessionController from "./sessionController.js";
 
 import Joi from "joi";
 dotenv.config();
+
+const patientSessionDB = new patientSessionController();
+const sessionDB = new sessionController();
 
 class UserController extends Controller {
   constructor() {
@@ -56,7 +61,6 @@ class UserController extends Controller {
         name,
         cpf,
         password: this.HashPassword(password),
-        oldPassword: this.HashPassword(password),
       },
     };
     // -> Send data do crete user
@@ -82,13 +86,20 @@ class UserController extends Controller {
     if (user.error)
       response.send({ error: true, message: "Unable to connet server" });
     if (!user.data)
-      return response.send({ message: "Incorrect login or password" });
+      return response.send({
+        error: true,
+        message: "Incorrect login or password",
+      });
 
     // -> Verify recived password
     const { password } = request.body;
     const hashPassword = user.data.password;
     const hash = bcrypt.compareSync(password, hashPassword);
-    if (!hash) return response.send({ error: "Incorrect login or password" });
+    if (!hash)
+      return response.send({
+        error: true,
+        message: "Incorrect login or password",
+      });
 
     // -> buid a payload
     const { id, name, permission } = user.data;
@@ -103,15 +114,7 @@ class UserController extends Controller {
       expiresIn: "8h",
     });
 
-    // -> Store hash on cookie database
-    response.cookie(process.env.COOKIE_KEY, token, {
-      maxAge: 60 * 60 * 8,
-      httpOnly: true,
-      secure: true,
-      path: "/",
-    });
-
-    response.send("logged");
+    return response.send({ token });
   }
 
   async Update(request, response) {
@@ -209,8 +212,49 @@ class UserController extends Controller {
 
     response.send({ ...deleting.data });
   }
-  
 
+  async Search(request, response) {
+    const { clinicId, date } = request.body;
+
+    const params = {
+      where: {
+        clinicId,
+        date: new Date(date + " GMT"),
+      },
+    };
+
+    const sessions = await sessionDB.GetMany(params);
+
+    if (sessions.error)
+      return response.send({
+        error: true,
+        message: "Unable to connect server 1",
+      });
+
+    if (!Object.keys(sessions.data).length)
+      return response.send({ ...sessions.data });
+
+    const { id } = sessions.data;
+
+    const patientParams = {
+      where: {
+        sessionId: id,
+      },
+      include: {
+        Patient: true,
+      },
+    };
+
+    const userSessions = await patientSessionDB.GetMany(patientParams);
+
+    if (userSessions.error)
+      return response.send({
+        error: true,
+        message: "Unable to connect server 2 ",
+      });
+
+    return response.send({ ...userSessions.data });
+  }
 
 
 }
