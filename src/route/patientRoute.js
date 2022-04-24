@@ -30,17 +30,9 @@ route.post(
   clientController.Login.bind(clientController)
 );
 
-
 route.get(
-  "/sessions/scheduled",
+  "/scheduled",
   clientController.PatientSessions.bind(clientController)
-);
-
-route.post("/sessions/new", clientController.SessionNew.bind(clientController));
-
-route.delete(
-  "/sessions/delete/:id",
-  clientController.SessionDelete.bind(clientController)
 );
 
 export default route;

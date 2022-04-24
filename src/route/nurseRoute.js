@@ -30,6 +30,6 @@ route.post(
   clientController.Login.bind(clientController)
 );
 
-route.post("/search", clientController.Search.bind(clientController));
+
 
 export default route;

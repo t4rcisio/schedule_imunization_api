@@ -66,6 +66,11 @@ class UserController extends Controller {
     };
     // -> Send data do crete user
     const create = await super.Create(nurseParams);
+    if (create.error || !create.data)
+      return response.send({
+        error: false,
+        message: "An error occurred while saving user",
+      });
 
     response.send({ ...create.data });
   }
@@ -85,7 +90,7 @@ class UserController extends Controller {
     };
     const user = await super.GetOne(params);
     if (user.error)
-      response.send({ error: true, message: "Unable to connet server" });
+      response.send({ error: true, message: "Can't locate user" });
     if (!user.data)
       return response.send({
         error: true,
@@ -127,7 +132,7 @@ class UserController extends Controller {
     //
     const { id } = Decode(request.headers);
 
-    if (!id) response.send({ error: true, message: "unauthorized" });
+    if (!id) response.send({ error: true, message: "Failed to read token" });
 
     const params = {
       where: {
@@ -168,6 +173,8 @@ class UserController extends Controller {
     // Send data to update
     const update = await super.Update(updateParams);
 
+    console.log({ update });
+
     response.send({ ...update.data });
   }
 
@@ -179,7 +186,7 @@ class UserController extends Controller {
     //
     const { id } = Decode(request.headers);
 
-    if (!id) response.send({ error: true, message: "Fail to read token" });
+    if (!id) response.send({ error: true, message: "Failed to read token" });
 
     const params = {
       where: {
@@ -190,7 +197,7 @@ class UserController extends Controller {
     // -> Find user bay id url parameter
     const user = await super.GetOne(params);
     if (user.error || !user.data)
-      response.send({ error: "Unable to connect server" });
+      response.send({ error: true, message: "Unable to find user" });
 
     // -> Before aplly updates, analyze body password
     const { password } = request.body;
@@ -198,7 +205,8 @@ class UserController extends Controller {
 
     // -> Verify recived password
     const hash = bcrypt.compareSync(password, passHash);
-    if (!hash) return response.send({ error: "Incorrect password" });
+    if (!hash)
+      return response.send({ error: true, message: "Incorrect password" });
 
     const deleteParams = {
       where: {
@@ -207,67 +215,14 @@ class UserController extends Controller {
     };
     const deleting = await super.Delete(deleteParams);
 
+    if (deleting.error)
+      response.send({
+        error: true,
+        message: "An error occurred while deleting",
+      });
+
     response.send({ ...deleting.data });
-  }
-
-  async Search(request, response) {
-    const { clinicId, date } = request.body;
-
-    const params = {
-      where: {
-        clinicId,
-        date: new Date(date + " GMT"),
-      },
-    };
-
-    console.log(params);
-
-    const sessions = await sessionDB.Find(params);
-
-    if (sessions.error)
-      return response.send({
-        error: true,
-        message: "Unable to connect server 1",
-      });
-
-    if (!sessions.data) return response.send({});
-
-    if (!Object.keys(sessions.data).length)
-      return response.send({ ...sessions.data });
-
-    const { id } = sessions.data;
-
-    const patientParams = {
-      where: {
-        sessionId: id,
-      },
-      include: {
-        Patient: true,
-      },
-    };
-
-    const userSessions = await patientSessionDB.GetMany(patientParams);
-
-    if (userSessions.error)
-      return response.send({
-        error: true,
-        message: "Unable to connect server 2 ",
-      });
-
-    return response.send({ ...userSessions.data });
   }
 }
 
 export default UserController;
-
-/*
-model Nurse_user {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  name      String
-  cpf       String   @unique
-  password  String
-
-}
-*/
