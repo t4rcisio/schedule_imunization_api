@@ -2,7 +2,7 @@
 
 Módulo: API back-end
 
-Para compilar por completo o projeto, é preciso baixar e executar dois repositório:
+Para compilar por completo o projeto, é preciso baixar e executar dois repositórios:
 
 ->	A API (esse)
 ->	O front-end [front](https://github.com/t4rcisio/schedule_imunization_consumer)
@@ -11,19 +11,19 @@ Para compilar por completo o projeto, é preciso baixar e executar dois reposit�
 
 Preparando o ambiente de execução da API
 
-Passo 1
+Passo 1<br/>
 -> Clone o projeto
 - *git clone https://github.com/t4rcisio/schedule_imunization_api.git*
 
-Passo 2
+Passo 2<br/>
 -> Modifique o arquivo .env-example
 -  Modifique o nome do arquivo para .env e adicione um link para o mongoDB cloud
 
-Passo 3 
+Passo 3 <br/>
 -> Instale as dependências:
 - Na raiz do projeto, execute  *yarn install*
 
-Passo 4 
+Passo 4 <br/>
 -> Subindo o servidor
 - Por padrão, a porta que o servidor irá usar é a 5000<br />
         caso queira modificar, o parâmetro está no arquivo .env.<br />
