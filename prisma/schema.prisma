@@ -39,7 +39,7 @@ model Patient_session {
   status         Status       @default(Scheduled)
   Session        Session      @relation(fields: [sessionId], references: [id])
   Patient        Patient_user @relation(fields: [patient_userId], references: [id])
-  patient_userId String       @unique @db.ObjectId
+  patient_userId String       @db.ObjectId
   sessionId      String       @db.ObjectId
 }
 
@@ -50,6 +50,7 @@ model Patient_user {
   name            String
   cpf             String            @unique
   birthday        DateTime
+  permission      Permission        @default(patient)
   patient_session Patient_session[]
 }
 
@@ -60,7 +61,7 @@ model Nurse_user {
   name       String
   cpf        String     @unique
   password   String
-  permission Permission @default(ADM)
+  permission Permission @default(nurse)
 
 }
 
@@ -71,5 +72,6 @@ enum Status {
 }
 
 enum Permission {
-  ADM
+  nurse
+  patient
 }

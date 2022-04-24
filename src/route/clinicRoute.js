@@ -1,8 +1,8 @@
-import Route from "express";
+import Router from "express";
 import ClinicController from "../controller/clinicController.js";
 import { ClinicRules, ClinicValidation } from "../utils/clinicValidator.js";
 
-const route = Route();
+const route = Router();
 const clientController = new ClinicController();
 
 route.post(

@@ -1,33 +1,16 @@
-import Route from "express";
-import ClinicController from "../controller/clinicController.js";
+import Router from "express";
+import SessionController from "../controller/sessionController.js";
 import { SessionRules, SessionValidation } from "../utils/sessionValidator.js";
 
-const route = Route();
-const clientController = new ClinicController();
-
-route.post(
-  "/new",
-  SessionRules,
-  SessionValidation,
-  clientController.Create.bind(clientController)
-);
-route.post(
-  "/edit/:id",
-  SessionRules,
-  SessionValidation,
-  clientController.Update.bind(clientController)
-);
-route.delete(
-  "/delete/:id",
-  SessionRules,
-  SessionValidation,
-  clientController.Delete.bind(clientController)
-);
-route.get("/search", clientController.Search.bind(clientController));
-route.get("/get/:id", clientController.GetOne.bind(clientController));
-route.get("/all", clientController.GetAll.bind(clientController));
+const route = Router();
+const clientController = new SessionController();
 
 export default route;
+
+route.post(
+  "/patient/confirm",
+  clientController.ChangState.bind(clientController)
+);
 
 /*
 model Session {

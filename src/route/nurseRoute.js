@@ -1,8 +1,8 @@
-import Route from "express";
+import Router from "express";
 import UserController from "../controller/nurseController.js";
 import { NurseRules, NurseValidation } from "../utils/nurseValidator.js";
 
-const route = Route();
+const route = Router();
 const clientController = new UserController();
 
 route.post(
@@ -31,10 +31,5 @@ route.post(
 );
 
 route.post("/search", clientController.Search.bind(clientController));
-
-route.post(
-  "/session/confirm",
-  clientController.ChangState.bind(clientController)
-);
 
 export default route;
