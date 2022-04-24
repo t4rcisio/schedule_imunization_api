@@ -12,7 +12,7 @@ route.post(
   clientController.Create.bind(clientController)
 );
 route.post(
-  "/edit/:id",
+  "/edit",
   NurseRules("edit"),
   NurseValidation, // Validate body before processing request
   clientController.Update.bind(clientController)

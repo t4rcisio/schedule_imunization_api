@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import { cpf as cpfValidator } from "cpf-cnpj-validator";
 import patientSessionController from "./patientSessionController.js";
 import sessionController from "./sessionController.js";
+import Decode from "../utils/tokenDecode.js";
 
 import Joi from "joi";
 dotenv.config();
@@ -107,6 +108,7 @@ class UserController extends Controller {
       id,
       name,
       permission,
+      cpf,
     };
 
     // -> Generate a hash
@@ -119,16 +121,13 @@ class UserController extends Controller {
 
   async Update(request, response) {
     //
-    // For security reasons, compare id received on parameters with id stored on token
-    // this way, i garant that user has permission do to this changes.
+    // For security reasons, this changes be apply on id inside token
+    // this way, i garant that user has permission to make changes.
     // auth.js middleware already checked signature of token, now, just decode hash
     //
-    const { auth_session } = request.cookies;
-    const token = jsonwebtoken.decode(auth_session);
-    const { id } = request.params;
-    const tokenId = token.id;
-    if (!(id === tokenId))
-      response.send({ error: true, message: "unauthorized" });
+    const { id } = Decode(request.headers);
+
+    if (!id) response.send({ error: true, message: "unauthorized" });
 
     const params = {
       where: {
@@ -139,7 +138,7 @@ class UserController extends Controller {
     // -> Find user bay id url parameter
     const user = await super.GetOne(params);
     if (user.error || !user.data)
-      response.send({ error: "Unable to connect server" });
+      response.send({ error: true, message: "Unable to find user" });
 
     // -> Before aplly updates, analyze body password
     const { password } = request.body;
@@ -147,7 +146,8 @@ class UserController extends Controller {
 
     // -> Verify recived password
     const hash = bcrypt.compareSync(password, passHash);
-    if (!hash) return response.send({ error: "Incorrect password" });
+    if (!hash)
+      return response.send({ error: true, message: "Incorrect password" });
 
     // If all ok, next to apply update
     const { newPassword, name, cpf } = request.body;
@@ -173,16 +173,13 @@ class UserController extends Controller {
 
   async Delete(request, response) {
     //
-    // For security reasons, compare id received on parameters with id stored on token
-    // this way, i garant that user has permission do to this changes.
+    // For security reasons, this changes be apply on id inside token
+    // this way, i garant that user has permission to make changes.
     // auth.js middleware already checked signature of token, now, just decode hash
     //
-    const { auth_session } = request.cookies;
-    const token = jsonwebtoken.decode(auth_session);
-    const { id } = request.params;
-    const tokenId = token.id;
-    if (!(id === tokenId))
-      response.send({ error: true, message: "unauthorized" });
+    const { id } = Decode(request.headers);
+
+    if (!id) response.send({ error: true, message: "Fail to read token" });
 
     const params = {
       where: {
@@ -223,13 +220,17 @@ class UserController extends Controller {
       },
     };
 
-    const sessions = await sessionDB.GetMany(params);
+    console.log(params);
+
+    const sessions = await sessionDB.Find(params);
 
     if (sessions.error)
       return response.send({
         error: true,
         message: "Unable to connect server 1",
       });
+
+    if (!sessions.data) return response.send({});
 
     if (!Object.keys(sessions.data).length)
       return response.send({ ...sessions.data });
@@ -255,8 +256,6 @@ class UserController extends Controller {
 
     return response.send({ ...userSessions.data });
   }
-
-
 }
 
 export default UserController;

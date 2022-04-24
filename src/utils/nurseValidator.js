@@ -14,9 +14,8 @@ const NurseRules = (url) => {
     case "edit":
       {
         return [
-          param("id").trim().isString(),
           check("name").trim().isLength({ min: 2 }),
-          check("password").trim().isLength({ min: 8, max: 30 }),
+          check("cpf").trim().isLength({ min: 11, max: 11 }),
         ];
       }
       break;
