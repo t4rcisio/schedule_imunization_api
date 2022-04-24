@@ -124,12 +124,13 @@ class PatientControl extends Controller {
       return response.send({ error: true, message: "cpf doesn't exist" });
 
     // If find it, create a payload to generate the cookie token
-    const { id, name, birthday } = user.data;
+    const { id, name, birthday, permission } = user.data;
     const client = {
       id,
       name,
       cpf,
       birthday,
+      permission,
     };
 
     // Generate hash
@@ -189,6 +190,7 @@ class PatientControl extends Controller {
       },
     };
 
+    console.log({ params2: { ...params } });
     // Create a new patientSession
     const userSession = await patientSessionDB.Create(params);
     if (userSession.error)
@@ -207,8 +209,6 @@ class PatientControl extends Controller {
         count: session.count + 1,
       },
     };
-
-    console.log(sessionParams);
     const sessionUpdate = await sessionDB.Update(sessionParams);
 
     return response.send({ ...userSession.data });
@@ -229,10 +229,8 @@ class PatientControl extends Controller {
     // Check limits
     if (!(ndate >= begin && ndate <= end))
       return response.send({
-        error: "date out of attendances limits",
-        begin: begin,
-        end: end,
-        ndate: ndate,
+        error: true,
+        message: "Invalid time (out of range)",
       });
 
     // Generate creation params
@@ -260,15 +258,17 @@ class PatientControl extends Controller {
     //
     // First, check if already exist a session with same date
     //
-    const { date, time } = request.body;
+    const { date, time, clinicId } = request.body;
     // Convert string to date
     const ndate = new Date(date + " " + time + " GMT");
     const params = {
       where: {
+        clinicId,
         date: ndate,
       },
     };
     const sessionData = await sessionDB.Find(params);
+
     if (sessionData.error)
       return response.send({ error: true, message: "Unable to connet server" });
     if (sessionData.data)
@@ -296,9 +296,8 @@ class PatientControl extends Controller {
     const patientSession = await patientSessionDB.Delete(patientParams);
 
     if (patientSession.error || !patientSession.data)
-      response.send({ error: true, message: "Unable to connet server" });
+      return response.send({ error: true, message: "Unable to connet server" });
 
-    console.log({ DATA: patientSession.data });
     const { sessionId } = patientSession.data;
 
     const sessionParams = {

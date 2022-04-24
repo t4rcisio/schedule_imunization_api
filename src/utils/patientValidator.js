@@ -1,7 +1,6 @@
 import { check, param, validationResult } from "express-validator";
 
 const PatientRules = (url) => {
-  console.log(url);
   switch (url) {
     case "new":
       {
@@ -39,7 +38,6 @@ const PatientRules = (url) => {
 
 const PatientValidation = (request, response, next) => {
   const errorRules = validationResult(request);
-  console.log(errorRules);
   if (!errorRules.isEmpty())
     return response.send({ error: "Missing body huuuparams" }).status(422);
 

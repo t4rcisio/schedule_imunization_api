@@ -9,6 +9,6 @@ const router = Router();
 router.use("/nurse", nurse);
 router.use("/patient", patient);
 router.use("/clinic", clinic);
-route.use("/session", session);
+router.use("/session", session);
 
 export default router;

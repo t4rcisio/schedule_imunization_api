@@ -14,7 +14,6 @@ const UserAuth = (request, response, next) => {
     return next();
 
   const token = request.headers.token;
-  console.log(request.headers);
 
   if (!token) return response.send({ error: "Login required" }).status(403);
 
