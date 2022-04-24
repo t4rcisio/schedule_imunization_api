@@ -27,10 +27,7 @@ const PatientRules = (url) => {
       break;
     case "delete":
       {
-        return [
-          param("id").isString(),
-          check("cpf").isLength({ min: 11, max: 11 }),
-        ];
+        return [check("cpf").isLength({ min: 11, max: 11 })];
       }
       break;
   }
@@ -38,8 +35,12 @@ const PatientRules = (url) => {
 
 const PatientValidation = (request, response, next) => {
   const errorRules = validationResult(request);
+
+  //If body params is not match requirements
   if (!errorRules.isEmpty())
-    return response.send({ error: "Missing body huuuparams" }).status(422);
+    return response
+      .send({ error: true, message: "Incorrect body params" })
+      .status(422);
 
   next();
 };

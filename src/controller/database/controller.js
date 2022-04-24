@@ -6,6 +6,7 @@ class Controller {
     this.client = prisma[colletion];
   }
 
+  //Use to find one element on database
   async GetOne(data) {
     let clientData = { data: "", error: "" };
     try {
@@ -17,11 +18,11 @@ class Controller {
       clientData.data = error;
       clientData.error = true;
     }
-    console.log(clientData);
 
     return clientData;
   }
 
+  // To include a new element
   async Create(data) {
     let clientData = { data: "", error: "" };
     try {
@@ -37,6 +38,7 @@ class Controller {
     return clientData;
   }
 
+  // To update a exist element
   async Update(data) {
     let clientData = { data: "", error: "" };
     try {
@@ -52,6 +54,7 @@ class Controller {
     return clientData;
   }
 
+  // To delete one element
   async Delete(data) {
     let clientData = { data: "", error: "" };
     try {
@@ -66,6 +69,8 @@ class Controller {
 
     return clientData;
   }
+
+  // Search a element
   async Find(data) {
     let clientData = { data: "", error: "" };
     try {
@@ -81,6 +86,7 @@ class Controller {
     return clientData;
   }
 
+  // Get an array of elements
   async GetMany(data) {
     let clientData = { data: "", error: "" };
     try {

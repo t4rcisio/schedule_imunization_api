@@ -12,18 +12,19 @@ route.post(
   clientController.Create.bind(clientController)
 );
 route.post(
-  "/edit/:id",
+  "/edit",
   ClinicRules("edit"),
   ClinicValidation,
   clientController.Update.bind(clientController)
 );
 route.delete(
-  "/delete/:id",
+  "/delete",
   ClinicRules("delete"),
   ClinicValidation,
   clientController.Delete.bind(clientController)
 );
 
+// Get all clinics -> To generete select options on forms
 route.get("/all", clientController.GetMany.bind(clientController));
 
 export default route;

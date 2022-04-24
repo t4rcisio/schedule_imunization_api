@@ -1,13 +1,10 @@
 import Controller from "./database/controller.js";
-import Joi from "joi";
 import dotenv from "dotenv";
-import jsonwebtoken from "jsonwebtoken";
 import PatientSessionController from "./patientSessionController.js";
 import Decode from "../utils/tokenDecode.js";
 dotenv.config();
 
-const clinicSchema = Joi.object({});
-
+// Conection from patientSession databse
 const patientSessionDB = new PatientSessionController();
 
 class SessionController extends Controller {
@@ -16,10 +13,10 @@ class SessionController extends Controller {
   }
 
   // Change state of patient attendance, Schedule to Done
-  async ChangState(request, response) {
+  async ChangeState(request, response) {
     const { id, status } = request.body;
 
-    console.log(request.params);
+    // Search by id patientSession
     const params = {
       where: {
         id,
@@ -31,8 +28,6 @@ class SessionController extends Controller {
 
     const updateSession = await patientSessionDB.Update(params);
 
-    console.log({ update: updateSession });
-
     if (updateSession.error)
       return response.send({
         error: true,
@@ -42,17 +37,17 @@ class SessionController extends Controller {
     response.send({ ...updateSession.data });
   }
 
+  // Search session
   async Search(request, response) {
     const { clinicId, date } = request.body;
 
+    // Search by clinic and date
     const params = {
       where: {
         clinicId,
         date: new Date(date + " GMT"),
       },
     };
-
-    console.log(params);
 
     const sessions = await super.Find(params);
 
@@ -64,11 +59,14 @@ class SessionController extends Controller {
 
     if (!sessions.data) return response.send({});
 
+    // If search return empty array, stop next step,
+    //(seach userSessions associated with this session)
     if (!Object.keys(sessions.data).length)
       return response.send({ ...sessions.data });
 
     const { id } = sessions.data;
 
+    // Get all userSessions associated wiht session
     const patientParams = {
       where: {
         sessionId: id,
@@ -78,6 +76,7 @@ class SessionController extends Controller {
       },
     };
 
+    // Return array sessions
     const userSessions = await patientSessionDB.GetMany(patientParams);
 
     if (userSessions.error)
@@ -89,6 +88,7 @@ class SessionController extends Controller {
     return response.send({ ...userSessions.data });
   }
 
+  // Include a new patientSession associated a session
   async SessionInclude(request, session, response) {
     //
     // The system was projected allow two patients per session
@@ -99,6 +99,9 @@ class SessionController extends Controller {
     // Now, generate association params to add user on session
     const sessionId = session.id;
     const { id } = Decode(request.headers);
+
+    // PatientSession is a link between Session and Patient
+
     const params = {
       data: {
         Session: {
@@ -110,17 +113,16 @@ class SessionController extends Controller {
       },
     };
 
-    console.log({ params2: { ...params } });
     // Create a new patientSession
     const userSession = await patientSessionDB.Create(params);
+
     if (userSession.error)
       return response.send({
         error: true,
-        message: "Unable to server connect",
+        message: "Unable to create patient session",
       });
 
-    // Update session
-
+    // Update session, adding +1 on counter
     const sessionParams = {
       where: {
         id: session.id,
@@ -129,18 +131,20 @@ class SessionController extends Controller {
         count: session.count + 1,
       },
     };
+
+    // Apply update on session
     const sessionUpdate = await super.Update(sessionParams);
 
     return response.send({ ...userSession.data });
   }
 
+  // If date selected by patient is empty, create a new session
   async SessionCreate(request, response) {
     const { date, time, clinicId } = request.body;
     //
     // The system was projected to allow twenty attendaces per day
     //
-
-    // Attendance time
+    // Attendance time  Start : 08:00 End : 17:00
     const begin = new Date(date + " " + process.env.START + " GMT");
     const end = new Date(date + " " + process.env.END + " GMT");
 
@@ -171,12 +175,14 @@ class SessionController extends Controller {
         message: "Unable to server connect",
       });
 
+    // After create session, now create a patientSession (above method)
     return await this.SessionInclude(request, session.data, response);
   }
 
+  // Route to create a new Patient session
   async SessionNew(request, response) {
     //
-    // First, check if already exist a session with same date
+    // First, check if already exist a session with same date on clinic received
     //
     const { date, time, clinicId } = request.body;
     // Convert string to date
@@ -199,6 +205,7 @@ class SessionController extends Controller {
       return await this.SessionCreate(request, response);
   }
 
+  // To Patient delete session
   async SessionDelete(request, response) {
     const { id } = request.params;
     const usrId = Decode(request.headers).id;
@@ -216,8 +223,12 @@ class SessionController extends Controller {
     const patientSession = await patientSessionDB.Delete(patientParams);
 
     if (patientSession.error || !patientSession.data)
-      return response.send({ error: true, message: "Unable to connet server" });
+      return response.send({
+        error: true,
+        message: "Unable to delete patient session",
+      });
 
+    // to find a session associated
     const { sessionId } = patientSession.data;
 
     const sessionParams = {
@@ -228,8 +239,9 @@ class SessionController extends Controller {
 
     const session = await super.GetOne(sessionParams);
     if (session.error)
-      response.send({ error: true, message: "Unable to connet server" });
+      response.send({ error: true, message: "Unable to find session" });
 
+    //decrement one in session count
     const sessionUpdateParams = {
       where: {
         id: session.data.id,
@@ -240,6 +252,9 @@ class SessionController extends Controller {
     };
 
     const sessionUpdate = await super.Update(sessionUpdateParams);
+
+    if (sessionUpdate.error)
+      response.send({ error: true, message: "Unable to update session" });
 
     response.send({ ...patientSession.data });
   }

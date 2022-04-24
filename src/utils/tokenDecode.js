@@ -1,5 +1,6 @@
 import jsonwebtoken from "jsonwebtoken";
 
+// Feature to verify and decode token
 const Decode = (header) => {
   const { token } = header;
 
