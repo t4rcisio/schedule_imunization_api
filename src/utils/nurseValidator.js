@@ -16,16 +16,16 @@ const NurseRules = (url) => {
         return [
           check("name").trim().isLength({ min: 2 }),
           check("cpf").trim().isLength({ min: 11, max: 11 }),
+          check("password").trim().isLength({ min: 8, max: 30 }),
         ];
       }
       break;
-    case "restore-password":
+    case "restore-password": // Not implemented yet
       {
         return [
-          param("id").trim().isString(),
           check("current").trim().isLength({ min: 8, max: 30 }),
           check("new").trim().isLength({ min: 8, max: 30 }),
-          check("new-repeat").trim().isLength({ min: 8, max: 30 }),
+          check("newRepeat").trim().isLength({ min: 8, max: 30 }),
         ];
       }
       break;
@@ -39,10 +39,7 @@ const NurseRules = (url) => {
       break;
     case "delete":
       {
-        return [
-          param("id").trim().isString(),
-          check("cpf").trim().isLength({ min: 11, max: 11 }),
-        ];
+        return [check("cpf").trim().isLength({ min: 11, max: 11 })];
       }
       break;
   }
@@ -50,11 +47,14 @@ const NurseRules = (url) => {
 
 const NurseValidation = (request, response, next) => {
   const errorRules = validationResult(request);
+
+  //If body params is not match requirements
   if (!errorRules.isEmpty())
     return response
-      .send({ error: true, message: "invalid params" })
+      .send({ error: true, message: "Incorrect body params" })
       .status(422);
 
+  //continue
   next();
 };
 

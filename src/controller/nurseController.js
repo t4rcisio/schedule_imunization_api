@@ -7,32 +7,17 @@ import patientSessionController from "./patientSessionController.js";
 import sessionController from "./sessionController.js";
 import Decode from "../utils/tokenDecode.js";
 
-import Joi from "joi";
 dotenv.config();
-
-const patientSessionDB = new patientSessionController();
-const sessionDB = new sessionController();
 
 class UserController extends Controller {
   constructor() {
     super("Nurse_user");
   }
 
+  // Convert password to hash
   HashPassword(password) {
     const salt = bcrypt.genSaltSync(10);
     return bcrypt.hashSync(password, salt);
-  }
-
-  VerifyToken(userToken) {
-    try {
-      const token = jsonwebtoken.verify(
-        userToken,
-        process.env.SECRET_KEY_TOKEN
-      );
-      return true;
-    } catch (error) {
-      return false;
-    }
   }
 
   async Create(request, response) {
@@ -43,19 +28,21 @@ class UserController extends Controller {
       return response.send({ error: "invalid cpf format" });
 
     // -> Prisma doesn't support @unique parameter on Mongodb yet,
-    // -> so, I have to do it manually
+    // -> so, I have to check manually
     const params = {
       where: {
         cpf,
       },
     };
+
+    // Search if cpf already in use
     const user = await super.GetOne(params);
     if (user.error)
       response.send({ error: true, message: "Unable to connet server" });
     if (user.data)
       return response.send({ error: true, message: "cpf already exist" });
 
-    // Generate build params
+    // Generate params
     const { name, password } = request.body;
     const nurseParams = {
       data: {
@@ -64,7 +51,7 @@ class UserController extends Controller {
         password: this.HashPassword(password),
       },
     };
-    // -> Send data do crete user
+    // -> Send data do crete nurse
     const create = await super.Create(nurseParams);
     if (create.error || !create.data)
       return response.send({
@@ -82,12 +69,13 @@ class UserController extends Controller {
       return response.send({ error: "invalid cpf format" });
 
     // -> Prisma doesn't support @unique parameter on Mongodb yet,
-    // -> so, I have to do it manually
+    // -> so, I have to check manually
     const params = {
       where: {
         cpf,
       },
     };
+
     const user = await super.GetOne(params);
     if (user.error)
       response.send({ error: true, message: "Can't locate user" });
@@ -121,15 +109,14 @@ class UserController extends Controller {
       expiresIn: "8h",
     });
 
+    // Return token to client
     return response.send({ token });
   }
 
   async Update(request, response) {
-    //
-    // For security reasons, this changes be apply on id inside token
-    // this way, i garant that user has permission to make changes.
-    // auth.js middleware already checked signature of token, now, just decode hash
-    //
+    //Get user id from token
+    //auth.js checked signature from token received, then this step
+    //just decode to get user id
     const { id } = Decode(request.headers);
 
     if (!id) response.send({ error: true, message: "Failed to read token" });
@@ -140,10 +127,10 @@ class UserController extends Controller {
       },
     };
 
-    // -> Find user bay id url parameter
+    // -> Find user by id
     const user = await super.GetOne(params);
     if (user.error || !user.data)
-      response.send({ error: true, message: "Unable to find user" });
+      return response.send({ error: true, message: "Unable to find user" });
 
     // -> Before aplly updates, analyze body password
     const { password } = request.body;
@@ -164,7 +151,7 @@ class UserController extends Controller {
       data: {
         name,
         cpf,
-        password: newPassword
+        password: newPassword // To future "change password" feature implementation
           ? this.HashPassword(newPassword)
           : user.data.password,
       },
@@ -173,17 +160,16 @@ class UserController extends Controller {
     // Send data to update
     const update = await super.Update(updateParams);
 
-    console.log({ update });
+    if (update.error || !update.data)
+      return response.send({ error: true, message: "failed to update user" });
 
     response.send({ ...update.data });
   }
 
   async Delete(request, response) {
-    //
-    // For security reasons, this changes be apply on id inside token
-    // this way, i garant that user has permission to make changes.
-    // auth.js middleware already checked signature of token, now, just decode hash
-    //
+    //Get user id from token
+    //auth.js checked signature from token received, then this step
+    //just decode to get user id
     const { id } = Decode(request.headers);
 
     if (!id) response.send({ error: true, message: "Failed to read token" });
@@ -194,7 +180,7 @@ class UserController extends Controller {
       },
     };
 
-    // -> Find user bay id url parameter
+    // -> Find user by id
     const user = await super.GetOne(params);
     if (user.error || !user.data)
       response.send({ error: true, message: "Unable to find user" });

@@ -15,18 +15,22 @@ const UserAuth = (request, response, next) => {
 
   const token = request.headers.token;
 
+  // Verify header token
   if (!token)
     return response
       .send({ error: true, message: "Login is required" })
       .status(403);
 
+  // Check token authenticity
   try {
     const userAuth = jsonwebtoken.verify(token, process.env.SECRET_KEY_TOKEN);
   } catch (error) {
     return response
-      .send({ error: true, message: "Session expired, you need login again1" })
+      .send({ error: true, message: "Session expired, you need login again" })
       .status(403);
   }
+
+  // If all ok, continue
   return next();
 };
 

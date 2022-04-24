@@ -7,7 +7,7 @@ const clientController = new SessionController();
 
 route.post(
   "/patient/confirm",
-  clientController.ChangState.bind(clientController)
+  clientController.ChangeState.bind(clientController)
 );
 
 route.post("/search", clientController.Search.bind(clientController));

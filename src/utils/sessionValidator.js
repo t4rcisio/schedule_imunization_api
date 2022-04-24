@@ -6,21 +6,22 @@ const SessionRules = (url) => {
       {
         return [
           check("date").trim().isISO8601().toDate(),
-          check("clinc").trim().isString(),
-        ];
-      }
-      break;
-    case "edit":
-      {
-        return [
-          check("date").trim().isISO8601().toDate(),
-          check("clinc").trim().isString(),
+          check("time").trim().isString(),
+          check("clincId").trim().isString(),
         ];
       }
       break;
     case "delete":
       {
-        return [param("id").trim().isString()];
+        return [check("id").trim().isString()];
+      }
+      break;
+    case "confirm":
+      {
+        return [
+          check("id").trim().isString(),
+          check("status").trim().isString(),
+        ];
       }
       break;
   }
@@ -28,20 +29,15 @@ const SessionRules = (url) => {
 
 const SessionValidation = (request, response, next) => {
   const errorRules = validationResult(request);
-  if (!errorRules.isEmpty())
-    return response.send("<h2>Failed to process request</h2>").status(422);
 
+  //If body params is not match requirements
+  if (!errorRules.isEmpty())
+    return response
+      .send({ error: true, message: "Incorrect body params" })
+      .status(422);
+
+  //continue
   next();
 };
 
 export { SessionRules, SessionValidation };
-
-/*
-model Session {
-  id              String            @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt       DateTime          @default(now())
-  date            DateTime
-  clinic          Clinic            @relation(fields: [clinicId], references: [id])
-  clinicId        String            @db.ObjectId
-  Patiete_session Patient_session[]
-} */

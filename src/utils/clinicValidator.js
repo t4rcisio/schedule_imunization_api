@@ -1,5 +1,7 @@
 import { check, param, validationResult } from "express-validator";
 
+// Verify body params before continue to process request
+
 const ClinicRules = (url) => {
   switch (url) {
     case "new":
@@ -34,17 +36,15 @@ const ClinicRules = (url) => {
 
 const ClinicValidation = (request, response, next) => {
   const errorRules = validationResult(request);
-  if (!errorRules.isEmpty())
-    return response.send("<h2>Failed to process request</h2>").status(422);
 
+  //If body params isn't match requirements
+  if (!errorRules.isEmpty())
+    return response
+      .send({ error: true, message: "Incorrect body params" })
+      .status(422);
+
+  //continue
   next();
 };
 
 export { ClinicRules, ClinicValidation };
-
-/*
-localization String
-  name         String
-  zipcode      String
-  address      String
-  number       String */
