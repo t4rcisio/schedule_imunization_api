@@ -18,6 +18,9 @@ Passo 1<br/>
 Passo 2<br/>
 -> Modifique o arquivo .env-example
 -  Modifique o nome do arquivo para .env e adicione um link para o mongoDB cloud
+Exemplo de banco com algums dados carregados; "mongodb+srv://pitang:jNJzTpo2XRn73TCa@gotamagica-cluster.tosaw.mongodb.net/data-sus?retryWrites=true&w=majority"
+
+<br/>
 
 Passo 3 <br/>
 -> Instale as dependências:
