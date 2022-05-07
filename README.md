@@ -1,4 +1,4 @@
-# Desafio final Pitang
+# Plataforma de agendamento de vacina
 
 Módulo: API back-end
 
